@@ -1,6 +1,8 @@
-package com.example.backend.util;
+package com.example.backend.constant;
 
-public class AppConstants {
+public final class MessageConstants {
+    private MessageConstants() {
+    }
 
     // API Response Messages
     public static final String SUCCESS_MESSAGE = "Operation successful.";
@@ -15,39 +17,11 @@ public class AppConstants {
     public static final String APPOINTMENT_CANCEL_FAILED = "Appointment cannot be cancelled.";
     public static final String APPOINTMENT_RESCHEDULE_FAILED = "Appointment cannot be rescheduled.";
 
-    // Pagination and Sorting
-    public static final String DEFAULT_PAGE_NUMBER = "0";
-    public static final String DEFAULT_PAGE_SIZE = "10";
-    public static final String DEFAULT_SORT_BY = "createdAt";
-    public static final String DEFAULT_SORT_DIRECTION = "desc";
-
-    // User Roles
-    public static final String ROLE_PATIENT = "PATIENT";
-    public static final String ROLE_DOCTOR = "DOCTOR";
-    public static final String ROLE_ADMIN = "ADMIN";
-    public static final String ROLE_RECEPTIONIST = "RECEPTIONIST";
-
-    // JWT
-    public static final String JWT_SECRET_KEY = "${jwt.secret}";
-    public static final long JWT_EXPIRATION_MS = 86400000; // 24 hours
-    public static final long JWT_REFRESH_EXPIRATION_MS = 604800000; // 7 days
-
-    // Email
+    // Email Subjects
     public static final String EMAIL_SUBJECT_APPOINTMENT_CONFIRMATION = "Xác nhận lịch hẹn khám bệnh";
     public static final String EMAIL_SUBJECT_APPOINTMENT_REMINDER = "Nhắc nhở lịch hẹn khám bệnh";
     public static final String EMAIL_SUBJECT_PASSWORD_RESET = "Yêu cầu đặt lại mật khẩu";
 
-    // File Upload
-    public static final String UPLOAD_DIR = "uploads/";
-    public static final long MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
-
-    // Other
-    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final String DATE_FORMAT = "yyyy-MM-dd";
-
-    private AppConstants() {
-        // restrict instantiation
-    }
+    // Generic Error Messages
+    public static final String INTERNAL_SERVER_ERROR = "An unexpected error occurred. Please try again later.";
 }
-
-

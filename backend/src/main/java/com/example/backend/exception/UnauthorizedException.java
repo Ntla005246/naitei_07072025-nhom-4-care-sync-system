@@ -9,4 +9,3 @@ public class UnauthorizedException extends BusinessException {
         super("UNAUTHORIZED", message);
     }
 }
-

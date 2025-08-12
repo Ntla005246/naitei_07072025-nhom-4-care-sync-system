@@ -1,0 +1,39 @@
+#!/bin/sh
+echo "🔍 Running Spotless check & format for backend..."
+
+#### BACKEND ####
+# Lấy danh sách file staged (đã add vào commit)
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Lọc các file thuộc backend và có đuôi được format
+BACKEND_CHANGED=$(echo "$STAGED_FILES" | grep "^backend/" | grep -E "\.java$|\.xml$|\.html$|\.properties$")
+
+# Nếu không có file backend thay đổi thì bỏ qua
+if [ -z "$BACKEND_CHANGED" ]; then
+    echo "✅ No backend changes detected. Skipping Spotless."
+    exit 0
+fi
+
+# Chạy Spotless trong thư mục backend
+if [ -f "./backend/mvnw" ]; then
+    (cd backend && ./mvnw spotless:apply)
+else
+    (cd backend && mvn spotless:apply)
+fi
+
+# Nếu Spotless fail thì chặn commit
+if [ $? -ne 0 ]; then
+    echo "❌ Spotless failed. Fix formatting before committing."
+    exit 1
+fi
+
+# Lấy danh sách file bị Spotless thay đổi
+CHANGED_FILES=$(git diff --name-only)
+
+# Git add lại các file đã format
+echo "📄 Adding formatted changed files..."
+echo "$CHANGED_FILES" | xargs git add
+
+echo "✅ Spotless formatting complete. Proceeding with commit..."
+
+#### FRONTEND ####

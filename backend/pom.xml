@@ -173,6 +173,62 @@
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
+			<plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <java>
+                        <eclipse>
+                            <!-- File cấu hình formatter Eclipse -->
+                            <file>${project.basedir}/config/eclipse-java-style.xml</file>
+                        </eclipse>
+                        <removeUnusedImports/>
+                        <endWithNewline/>
+                    </java>
+
+                    <formats>
+                        <!-- Format HTML -->
+                        <format>
+                            <includes>
+                                <include>src/main/resources/**/*.html</include>
+                            </includes>
+                            <eclipseWtp>
+                                <type>HTML</type>
+                                <files>
+                                    <file>${project.basedir}/config/eclipse-html-style.prefs</file>
+                                </files>
+                            </eclipseWtp>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </format>
+
+                        <!-- Format XML -->
+                        <format>
+                            <includes>
+                                <include>src/**/*.xml</include>
+                            </includes>
+                            <eclipseWtp>
+                                <type>XML</type>
+                                <files>
+                                    <file>${project.basedir}/config/eclipse-xml-style.prefs</file>
+                                </files>
+                            </eclipseWtp>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </format>
+
+                        <!-- Properties -->
+                         <format>
+                            <includes>
+                                <include>src/**/*.properties</include>
+                            </includes>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </format>
+                    </formats>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

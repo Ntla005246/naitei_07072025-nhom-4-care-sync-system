@@ -1,11 +1,11 @@
 package com.example.backend.config;
 
+import com.example.backend.constant.ApiConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,11 +14,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -26,66 +21,40 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String[] PUBLIC_ENDPOINTS = {ApiConstants.AUTH_ENDPOINT + "/**",
+            "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**"};
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**",
+            "/specialties/**"};
+
+    private static final String[] PATIENT_ENDPOINTS = {ApiConstants.APPOINTMENTS_ENDPOINT + "/**",
+            "/payments/**", "/notifications/**", "/feedback/**"};
+
+    private static final String[] DOCTOR_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**"};
+
+    private static final String[] ADMIN_ENDPOINTS = {ApiConstants.ADMIN_ENDPOINT + "/**"};
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    public DaoAuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-//        authProvider.setPasswordEncoder(passwordEncoder());
-//        return authProvider;
-//    }
-
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
-    
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-//            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .authorizeHttpRequests(authz -> authz
-                // Public endpoints
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                
-                // Public read endpoints
-                .requestMatchers(HttpMethod.GET, "/doctors/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/specialties/**").permitAll()
-                
-                // Patient endpoints
-                .requestMatchers("/appointments/**").hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
-                .requestMatchers("/payments/**").hasAnyRole("PATIENT", "ADMIN")
-                .requestMatchers("/notifications/**").hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
-                .requestMatchers("/feedback/**").hasAnyRole("PATIENT", "ADMIN")
-                
-                // Doctor endpoints
-                .requestMatchers("/doctor/**").hasAnyRole("DOCTOR", "ADMIN")
-                
-                // Admin endpoints
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                
-                // All other requests need authentication
-                .anyRequest().authenticated()
-            );
+                .authorizeHttpRequests(authz -> authz.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                        .requestMatchers(PATIENT_ENDPOINTS).hasAnyRole("PATIENT", "DOCTOR", "ADMIN")
+                        .requestMatchers(DOCTOR_ENDPOINTS).hasAnyRole("DOCTOR", "ADMIN")
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN").anyRequest()
+                        .authenticated());
 
         return http.build();
     }
-    
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        configuration.setAllowedHeaders(Arrays.asList("*"));
-//        configuration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles version="12">
+<profile kind="CodeFormatterProfile" name="Custom-Java" version="12">
+<setting id="org.eclipse.jdt.core.formatter.tabulation.size" value="4"/>
+<setting id="org.eclipse.jdt.core.formatter.lineSplit" value="100"/>
+<setting id="org.eclipse.jdt.core.formatter.tabulation.char" value="space"/>
+</profile>
+</profiles>

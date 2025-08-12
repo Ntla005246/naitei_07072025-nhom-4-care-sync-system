@@ -1,0 +1,6 @@
+org.eclipse.wst.xml.core.formatter.indentationChar=space
+org.eclipse.wst.xml.core.formatter.indentationSize=4
+org.eclipse.wst.xml.core.formatter.lineWidth=100
+org.eclipse.wst.xml.core.formatter.insertNewLineAtEndOfFileIfMissing=true
+org.eclipse.wst.xml.core.formatter.splitMultiAttrs=false
+org.eclipse.wst.xml.core.formatter.formatComments=true
