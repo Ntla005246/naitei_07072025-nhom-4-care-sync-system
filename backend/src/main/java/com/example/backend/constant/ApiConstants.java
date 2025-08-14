@@ -10,5 +10,6 @@ public final class ApiConstants {
     public static final String USERS_ENDPOINT = API_V1 + "/users";
     public static final String APPOINTMENTS_ENDPOINT = API_V1 + "/appointments";
     public static final String DOCTORS_ENDPOINT = API_V1 + "/doctors";
+    public static final String SPECIALTIES_ENDPOINT = API_V1 + "/specialties";
     public static final String ADMIN_ENDPOINT = API_V1 + "/admin";
 }

@@ -17,6 +17,20 @@ public final class MessageConstants {
     public static final String APPOINTMENT_CANCEL_FAILED = "Appointment cannot be cancelled.";
     public static final String APPOINTMENT_RESCHEDULE_FAILED = "Appointment cannot be rescheduled.";
 
+    // Specialty Messages
+    public static final String SPECIALTY_NOT_FOUND = "Specialty not found.";
+    public static final String SPECIALTY_SEARCH_SUCCESS = "Specialty search completed successfully.";
+
+    // Validation Messages
+    public static final String VALIDATION_PAGE_NUMBER_MIN = "Page number must be >= 0.";
+    public static final String VALIDATION_PAGE_SIZE_MIN = "Page size must be >= 1.";
+    public static final String VALIDATION_SORT_FIELD_INVALID = "Invalid sort field. Allowed values: name, description, createdAt.";
+    public static final String VALIDATION_SORT_DIRECTION_INVALID = "Sort direction must be 'asc' or 'desc'.";
+
+    // Specialty DTO Validation Messages
+    public static final String VALIDATION_SPECIALTY_ID_POSITIVE = "Specialty ID must be positive.";
+    public static final String VALIDATION_SPECIALTY_NAME_NOT_EMPTY = "Specialty name cannot be empty.";
+
     // Email Subjects
     public static final String EMAIL_SUBJECT_APPOINTMENT_CONFIRMATION = "Xác nhận lịch hẹn khám bệnh";
     public static final String EMAIL_SUBJECT_APPOINTMENT_REMINDER = "Nhắc nhở lịch hẹn khám bệnh";

@@ -29,7 +29,7 @@ public class SecurityConfig {
             "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**"};
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**",
-            "/specialties/**"};
+            ApiConstants.SPECIALTIES_ENDPOINT + "/**"};
 
     private static final String[] PATIENT_ENDPOINTS = {ApiConstants.APPOINTMENTS_ENDPOINT + "/**",
             "/payments/**", "/notifications/**", "/feedback/**"};
