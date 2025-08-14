@@ -1,5 +1,7 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.enums.PaymentMethod;
+import com.example.backend.constant.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +15,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "payments")
-public class Payment {
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,11 +28,13 @@ public class Payment {
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private PaymentStatus status;
 
     @Column(name = "transaction_code")
     private String transactionCode;

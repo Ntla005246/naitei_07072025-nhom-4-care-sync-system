@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.enums.AppointmentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,18 +14,22 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "appointments")
-public class Appointment {
+public class Appointment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_user_id", nullable = false)
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private AppointmentStatus status;
 
     // --- Associations ---
 

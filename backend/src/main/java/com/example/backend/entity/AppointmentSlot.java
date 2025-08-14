@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.enums.AppointmentSlotStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "appointment_slots")
-public class AppointmentSlot {
+public class AppointmentSlot extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +30,12 @@ public class AppointmentSlot {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private int status;
+    private AppointmentSlotStatus status;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_id", unique = true) // unique = true đảm bảo 1 slot chỉ cho 1 appointment
+    @JoinColumn(name = "appointment_id", unique = true) // unique = true đảm bảo 1 slot chỉ cho 1
+                                                        // appointment
     private Appointment appointment;
 }
-

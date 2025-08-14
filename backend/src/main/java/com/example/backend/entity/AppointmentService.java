@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Entity
 @Table(name = "appointment_services")
-public class AppointmentService {
+public class AppointmentService extends BaseEntity {
 
     @EmbeddedId
     private AppointmentServiceId id;

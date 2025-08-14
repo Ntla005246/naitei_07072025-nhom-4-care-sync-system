@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -8,11 +9,13 @@ import lombok.Setter;
 import java.util.Set;
 import java.time.LocalDate;
 
-@Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,10 +29,11 @@ public class User {
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
-    @Column(name = "password_hash" )
-    private String passwordHash;
+    @Column(name = "password")
+    private String password;
 
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
@@ -57,11 +61,6 @@ public class User {
     private Set<Notification> notifications;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "UserRoles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 }
-

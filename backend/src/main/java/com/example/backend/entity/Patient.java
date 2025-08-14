@@ -7,12 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.util.Set;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "patients")
-public class Patient {
+public class Patient extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,4 +38,3 @@ public class Patient {
     @OneToMany(mappedBy = "patient")
     private Set<Appointment> appointments;
 }
-

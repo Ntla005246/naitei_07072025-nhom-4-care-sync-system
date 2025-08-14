@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 
+import com.example.backend.constant.enums.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "invoices")
-public class Invoice {
+public class Invoice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,8 +32,9 @@ public class Invoice {
     @Column(name = "final_amount", nullable = false)
     private BigDecimal finalAmount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private InvoiceStatus status;
 
     @Column(name = "issued_date", nullable = false)
     private LocalDateTime issuedDate;

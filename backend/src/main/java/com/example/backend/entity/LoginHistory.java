@@ -7,11 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "login_history")
-public class LoginHistory {
+public class LoginHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,4 +31,3 @@ public class LoginHistory {
     @Column(name = "login_time")
     private LocalDateTime loginTime;
 }
-

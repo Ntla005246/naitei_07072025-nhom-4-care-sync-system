@@ -13,7 +13,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "doctor_working_hours")
-public class DoctorWorkingHours {
+public class DoctorWorkingHours extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

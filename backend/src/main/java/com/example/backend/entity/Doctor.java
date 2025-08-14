@@ -8,11 +8,13 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.Set;
 
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "doctors")
-public class Doctor {
+public class Doctor extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +24,7 @@ public class Doctor {
     @JoinColumn(name = "user_id", referencedColumnName = "id", unique = true)
     private User user;
 
-    //ManyToOne
+    // ManyToOne
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specialty_id")
     private Specialty specialty;
