@@ -68,3 +68,5 @@ yarn-debug.log*
 
 .idea/
 
+# Ignore local application configuration
+application.yml

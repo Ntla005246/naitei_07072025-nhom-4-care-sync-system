@@ -2,10 +2,8 @@ package com.example.backend.entity;
 
 import com.example.backend.constant.enums.Gender;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.util.Set;
 import java.time.LocalDate;
 
@@ -13,6 +11,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User extends BaseEntity {
@@ -20,17 +19,17 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(name = "phone_number", unique = true)
     private String phoneNumber;
 
-    @Column(name = "password")
-    private String password;
+    @Column(name = "password", nullable = false)
+    private String passwordHash;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -60,7 +59,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private Set<Notification> notifications;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
 }

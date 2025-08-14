@@ -10,12 +10,12 @@ public final class MessageConstants {
     public static final String RESOURCE_NOT_FOUND = "Resource not found.";
     public static final String UNAUTHORIZED_ACCESS = "Unauthorized access.";
     public static final String VALIDATION_ERROR = "Validation failed.";
-    public static final String USERNAME_ALREADY_EXISTS = "Username already exists.";
-    public static final String EMAIL_ALREADY_EXISTS = "Email already exists.";
+    public static final String EMAIL_ALREADY_EXISTS = "Lỗi: Email đã được sử dụng!";
     public static final String INVALID_CREDENTIALS = "Invalid username or password.";
     public static final String APPOINTMENT_NOT_AVAILABLE = "Selected time slot is not available.";
     public static final String APPOINTMENT_CANCEL_FAILED = "Appointment cannot be cancelled.";
     public static final String APPOINTMENT_RESCHEDULE_FAILED = "Appointment cannot be rescheduled.";
+    public static final String ROLE_NOT_FOUND = "Lỗi: Không tìm thấy vai trò 'PATIENT'.";
 
     // Specialty Messages
     public static final String SPECIALTY_NOT_FOUND = "Specialty not found.";
@@ -38,4 +38,12 @@ public final class MessageConstants {
 
     // Generic Error Messages
     public static final String INTERNAL_SERVER_ERROR = "An unexpected error occurred. Please try again later.";
+
+    // Validation Messages
+    public static final String USERNAME_REQUIRED = "Tên đăng nhập là bắt buộc";
+    public static final String EMAIL_REQUIRED = "Email là bắt buộc";
+    public static final String EMAIL_INVALID = "Email không hợp lệ";
+    public static final String PASSWORD_REQUIRED = "Mật khẩu là bắt buộc";
+    public static final String PASSWORD_MIN_LENGTH = "Mật khẩu phải có ít nhất 8 ký tự";
+    public static final String FULLNAME_REQUIRED = "Họ và tên là bắt buộc";
 }
