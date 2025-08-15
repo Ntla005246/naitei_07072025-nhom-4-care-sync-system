@@ -9,36 +9,47 @@ import org.springframework.stereotype.Component;
 
 import com.example.backend.dto.DoctorDto;
 import com.example.backend.entity.Doctor;
+import com.example.backend.entity.Specialty;
+import com.example.backend.entity.User;
 
 @Component
 public class DoctorMapper {
-    public Optional<DoctorDto> toDto(Doctor doctor){
-        if (doctor == null){
-            return Optional.empty();
-        }
-        return Optional.of(DoctorDto.builder()
-                .id(doctor.getId())
-                .fullName(doctor.getUser().getFullName())
-                .email(doctor.getUser().getEmail())
-                .phone(doctor.getUser().getPhoneNumber())
-                .title(doctor.getTitle())
-                .specialtyName(doctor.getSpecialty().getName())
-                .experienceYears(doctor.getExperienceYears())
-                .bio(doctor.getBio())
-                .consultationFee(doctor.getConsultationFee())
-                .build());
-    }
+	public Optional<DoctorDto> toDto(Doctor doctor){
+		if (doctor == null){
+			return Optional.empty();
+		}
 
-    public List<DoctorDto> toDtoList(List<Doctor> doctors){
-        if (doctors == null || doctors.isEmpty()){
-            return Collections.emptyList();
-        }
+		User user = doctor.getUser();
+		Specialty specialty = doctor.getSpecialty();
 
-        return doctors.stream()
-                .map(this::toDto)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
+		String fullName = (user != null) ? user.getFullName() : null;
+		String email = (user != null) ? user.getEmail() : null;
+		String phone = (user != null) ? user.getPhoneNumber() : null;
+		String specialtyName = (specialty != null) ? specialty.getName() : null;
+
+		return Optional.of(new DoctorDto(
+				doctor.getId(),
+				fullName,
+				email,
+				phone,
+				doctor.getTitle(),
+				specialtyName,
+				doctor.getExperienceYears(),
+				doctor.getBio(),
+				doctor.getConsultationFee()
+		));
+	}
+
+	public List<DoctorDto> toDtoList(List<Doctor> doctors){
+		if (doctors == null || doctors.isEmpty()){
+			return Collections.emptyList();
+		}
+
+		return doctors.stream()
+				.map(this::toDto)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
+	}
 
 }
