@@ -21,11 +21,23 @@ public final class MessageConstants {
     public static final String SPECIALTY_NOT_FOUND = "Specialty not found.";
     public static final String SPECIALTY_SEARCH_SUCCESS = "Specialty search completed successfully.";
 
+    // Time Off Messages
+    public static final String DOCTOR_TIME_OFF_CREATED_SUCCESS = "Thêm lịch nghỉ thành công.";
+    public static final String DOCTOR_TIME_OFF_NOT_FOUND = "Lịch nghỉ không tồn tại.";
+    public static final String TIME_OFF_CONFLICT = "Time off conflicts with existing schedule.";
+
     // Validation Messages
     public static final String VALIDATION_PAGE_NUMBER_MIN = "Page number must be >= 0.";
     public static final String VALIDATION_PAGE_SIZE_MIN = "Page size must be >= 1.";
     public static final String VALIDATION_SORT_FIELD_INVALID = "Invalid sort field. Allowed values: name, description, createdAt.";
     public static final String VALIDATION_SORT_DIRECTION_INVALID = "Sort direction must be 'asc' or 'desc'.";
+    public static final String VALIDATION_TIME_OFF_START_AFTER_END = "Start time must be before end time.";
+    public static final String VALIDATION_TIME_OFF_START_IN_PAST = "Start time cannot be in the past.";
+    public static final String VALIDATION_TIME_OFF_DOCTOR_REQUIRED = "Doctor is required.";
+    public static final String VALIDATION_TIME_OFF_REASON_REQUIRED = "Reason is required.";
+    public static final String VALIDATION_TIME_OFF_START_DATETIME_REQUIRED = "Start datetime is required.";
+    public static final String VALIDATION_TIME_OFF_END_DATETIME_REQUIRED = "End datetime is required.";
+    public static final String VALIDATION_TIME_OFF_DATETIME_FORMAT = "Invalid datetime format. Use 'YYYY-MM-DD' or 'YYYY-MM-DD HH:mm'.";
 
     // Specialty DTO Validation Messages
     public static final String VALIDATION_SPECIALTY_ID_POSITIVE = "Specialty ID must be positive.";
