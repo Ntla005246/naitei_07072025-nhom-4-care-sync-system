@@ -8,4 +8,8 @@ public class ResourceNotFoundException extends BusinessException {
     public ResourceNotFoundException(String errorCode, Object... args) {
         super(errorCode, args);
     }
+
+    public ResourceNotFoundException(String errorCode, String message) {
+        super(errorCode, message);
+    }
 }

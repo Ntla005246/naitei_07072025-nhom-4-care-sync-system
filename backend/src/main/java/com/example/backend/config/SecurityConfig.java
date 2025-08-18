@@ -69,8 +69,8 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> authz.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
-                        .requestMatchers(PATIENT_ENDPOINTS).hasRole("PATIENT")
-                        .requestMatchers(DOCTOR_ENDPOINTS).permitAll()
+                        .requestMatchers(PATIENT_ENDPOINTS).permitAll()
+                        .requestMatchers(DOCTOR_ENDPOINTS).hasRole("DOCTOR")
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN").anyRequest()
                         .authenticated());
 
