@@ -1,6 +1,5 @@
 package com.example.backend.util;
 
-import com.example.backend.constant.MessageConstants;
 import com.example.backend.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -31,8 +30,7 @@ public class TimeOffValidator {
                         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
             }
         } catch (DateTimeParseException e) {
-            throw new BusinessException("VALIDATION_ERROR", "Invalid datetime format: "
-                    + dateTimeStr + ". Use 'YYYY-MM-DD' or 'YYYY-MM-DD HH:mm'");
+            throw new BusinessException("validation.time.off.datetime.format", dateTimeStr);
         }
     }
 
@@ -42,14 +40,12 @@ public class TimeOffValidator {
     public void validateTimeOffRequest(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         // Validation: start time phải trước end time
         if (startDateTime.isAfter(endDateTime)) {
-            throw new BusinessException("VALIDATION_ERROR",
-                    MessageConstants.VALIDATION_TIME_OFF_START_AFTER_END);
+            throw new BusinessException("validation.time.off.start.after.end");
         }
 
         // Validation: start time không được trong quá khứ
         if (startDateTime.isBefore(LocalDateTime.now())) {
-            throw new BusinessException("VALIDATION_ERROR",
-                    MessageConstants.VALIDATION_TIME_OFF_START_IN_PAST);
+            throw new BusinessException("validation.time.off.start.in.past");
         }
 
         // Validation: Nếu nghỉ cả ngày, end time sẽ là 23:59:59
@@ -61,8 +57,7 @@ public class TimeOffValidator {
 
         // Validation: Khoảng thời gian nghỉ phải hợp lý (ít nhất 30 phút)
         if (startDateTime.plusMinutes(30).isAfter(endDateTime)) {
-            throw new BusinessException("VALIDATION_ERROR",
-                    "Time off duration must be at least 30 minutes");
+            throw new BusinessException("validation.time.off.min.duration");
         }
     }
 }

@@ -9,10 +9,11 @@ import com.example.backend.repository.DoctorTimeOffRepository;
 import com.example.backend.service.DoctorTimeOffService;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.BusinessException;
-import com.example.backend.constant.MessageConstants;
 import com.example.backend.util.TimeOffValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class DoctorTimeOffServiceImpl implements DoctorTimeOffService {
     private final DoctorTimeOffRepository doctorTimeOffRepository;
     private final DoctorRepository doctorRepository;
     private final TimeOffValidator timeOffValidator;
+    private final MessageSource messageSource;
 
     @Override
     public ApiResponse<String> createTimeOff(DoctorTimeOffRequestDto request) {
@@ -40,14 +42,13 @@ public class DoctorTimeOffServiceImpl implements DoctorTimeOffService {
         timeOffValidator.validateTimeOffRequest(startDateTime, endDateTime);
 
         // Kiểm tra doctor có tồn tại không
-        Doctor doctor = doctorRepository.findById(request.doctorId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Doctor not found with id: " + request.doctorId()));
+        Doctor doctor = doctorRepository.findById(request.doctorId()).orElseThrow(
+                () -> new ResourceNotFoundException("error.user.not.found", request.doctorId()));
 
         // Kiểm tra xung đột thời gian
         if (doctorTimeOffRepository.existsOverlappingTimeOff(request.doctorId(), startDateTime,
                 endDateTime)) {
-            throw new BusinessException("TIME_OFF_CONFLICT", MessageConstants.TIME_OFF_CONFLICT);
+            throw new BusinessException("error.time.off.conflict");
         }
 
         // Tạo DoctorTimeOff
@@ -60,7 +61,8 @@ public class DoctorTimeOffServiceImpl implements DoctorTimeOffService {
         doctorTimeOffRepository.save(timeOff);
 
         log.info("Time off created successfully for doctor: {}", request.doctorId());
-        return ApiResponse.success("Time off created",
-                MessageConstants.DOCTOR_TIME_OFF_CREATED_SUCCESS);
+        String message = messageSource.getMessage("success.doctor.time.off.created", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(null, message);
     }
 }

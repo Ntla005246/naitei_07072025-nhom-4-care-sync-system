@@ -1,6 +1,5 @@
 package com.example.backend.dto;
 
-import com.example.backend.constant.MessageConstants;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +22,8 @@ public class ApiResponse<T> {
     private LocalDateTime timestamp;
 
     public static <T> ApiResponse<T> success(T data) {
-        return ApiResponse.<T>builder().success(true).data(data)
-                .message(MessageConstants.SUCCESS_MESSAGE).timestamp(LocalDateTime.now()).build();
+        return ApiResponse.<T>builder().success(true).data(data).timestamp(LocalDateTime.now())
+                .build();
     }
 
     public static <T> ApiResponse<T> success(T data, String message) {
@@ -50,6 +49,21 @@ public class ApiResponse<T> {
                 .timestamp(LocalDateTime.now()).build();
     }
 
+    public static <T> ApiResponse<T> error(String code, String message, int httpStatus) {
+        return ApiResponse
+                .<T>builder().success(false).error(ErrorDetails.builder().code(code)
+                        .message(message).httpStatus(httpStatus).build())
+                .timestamp(LocalDateTime.now()).build();
+    }
+
+    public static <T> ApiResponse<T> error(String code, String message, Object details,
+            int httpStatus) {
+        return ApiResponse
+                .<T>builder().success(false).error(ErrorDetails.builder().code(code)
+                        .message(message).details(details).httpStatus(httpStatus).build())
+                .timestamp(LocalDateTime.now()).build();
+    }
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -59,5 +73,6 @@ public class ApiResponse<T> {
         private String code;
         private String message;
         private Object details;
+        private Integer httpStatus;
     }
 }

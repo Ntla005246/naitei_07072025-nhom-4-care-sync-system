@@ -29,19 +29,19 @@ public class DoctorServiceImpl implements DoctorService {
     private final DoctorMapper doctorMapper;
 
     @Override
-    public List<DoctorDto> getAllDoctors(){
+    public List<DoctorDto> getAllDoctors() {
         List<Doctor> doctors = doctorRepository.findAll();
         return doctorMapper.toDtoList(doctors);
     }
 
     @Override
-    public List<DoctorDto> getAllActiveDoctors(){
+    public List<DoctorDto> getAllActiveDoctors() {
         List<Doctor> doctors = doctorRepository.findAllActiveDoctors();
         return doctorMapper.toDtoList(doctors);
     }
 
     @Override
-    public List<DoctorDto> getDoctorsBySpecialty(Long specialtyId){
+    public List<DoctorDto> getDoctorsBySpecialty(Long specialtyId) {
         List<Doctor> doctors = doctorRepository.findBySpecialty(specialtyId);
         return doctorMapper.toDtoList(doctors);
     }

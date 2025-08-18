@@ -1,6 +1,5 @@
 package com.example.backend.dto.request;
 
-import com.example.backend.constant.MessageConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,15 +10,15 @@ import lombok.Setter;
 @Setter
 public class RegisterRequest {
 
-    @NotBlank(message = MessageConstants.EMAIL_REQUIRED)
-    @Email(message = MessageConstants.EMAIL_INVALID)
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
     private String email;
 
-    @NotBlank(message = MessageConstants.PASSWORD_REQUIRED)
-    @Size(min = 8, message = MessageConstants.PASSWORD_MIN_LENGTH)
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 8, message = "{validation.password.min.length}")
     private String password;
 
-    @NotBlank(message = MessageConstants.FULLNAME_REQUIRED)
+    @NotBlank(message = "{validation.fullname.required}")
     private String fullName;
 
     private String phoneNumber;

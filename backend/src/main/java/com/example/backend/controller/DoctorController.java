@@ -37,7 +37,7 @@ public class DoctorController {
 	@Operation(summary = "Get all doctors", description = "Retrieve a list of all active doctors")
 	public ApiResponse<List<DoctorDto>> getAllDoctors() {
 		List<DoctorDto> doctors = doctorService.getAllDoctors();
-		String message = messageSource.getMessage("doctors.retrieved.success", null,
+		String message = messageSource.getMessage("success.doctors.retrieved", null,
 				LocaleContextHolder.getLocale());
 		return ApiResponse.success(doctors, message);
 	}
@@ -46,7 +46,7 @@ public class DoctorController {
 	@Operation(summary = "Get doctors by specialty", description = "Retrieve doctors filtered by specialty ID")
 	public ApiResponse<List<DoctorDto>> getDoctorsBySpecialty(@PathVariable Long specialtyId) {
 		List<DoctorDto> doctors = doctorService.getDoctorsBySpecialty(specialtyId);
-		String message = messageSource.getMessage("doctors.bySpecialty.success", null,
+		String message = messageSource.getMessage("success.doctors.by.specialty.retrieved", null,
 				LocaleContextHolder.getLocale());
 		return ApiResponse.success(doctors, message);
 	}
@@ -55,7 +55,7 @@ public class DoctorController {
 	@Operation(summary = "Search doctors with pagination", description = "Search and filter doctors with pagination support")
 	public ApiResponse<PageResponse<DoctorDto>> searchDoctors(@ModelAttribute DoctorSearchRequest request) {
 		PageResponse<DoctorDto> result = doctorService.searchDoctors(request);
-		String message = messageSource.getMessage("doctors.search.success", null,
+		String message = messageSource.getMessage("success.operation", null,
 				LocaleContextHolder.getLocale());
 		return ApiResponse.success(result, message);
 	}

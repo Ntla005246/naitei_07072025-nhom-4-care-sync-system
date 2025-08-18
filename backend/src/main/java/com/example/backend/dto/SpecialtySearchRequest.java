@@ -1,6 +1,5 @@
 package com.example.backend.dto;
 
-import com.example.backend.constant.MessageConstants;
 import com.example.backend.constant.PagingConstants;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,16 +14,16 @@ public class SpecialtySearchRequest {
     private String q; // Query search theo tên chuyên khoa
     private String location; // Lọc theo địa điểm của bác sĩ
 
-    @Min(value = 0, message = MessageConstants.VALIDATION_PAGE_NUMBER_MIN)
+    @Min(value = 0, message = "{validation.page.number.min}")
     private Integer page; // Trang hiện tại
 
-    @Min(value = 1, message = MessageConstants.VALIDATION_PAGE_SIZE_MIN)
+    @Min(value = 1, message = "{validation.page.size.min}")
     private Integer size; // Số lượng item per page
 
-    @Pattern(regexp = "^(name|description|createdAt)$", message = MessageConstants.VALIDATION_SORT_FIELD_INVALID)
+    @Pattern(regexp = "^(name|description|createdAt)$", message = "{validation.sort.field.invalid}")
     private String sortBy; // Sắp xếp theo trường
 
-    @Pattern(regexp = "^(asc|desc)$", message = MessageConstants.VALIDATION_SORT_DIRECTION_INVALID)
+    @Pattern(regexp = "^(asc|desc)$", message = "{validation.sort.direction.invalid}")
     private String sortDirection; // Hướng sắp xếp (asc/desc)
 
     // Default constructor với giá trị mặc định

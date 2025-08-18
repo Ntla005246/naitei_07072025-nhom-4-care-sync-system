@@ -10,14 +10,8 @@ public class BusinessException extends RuntimeException {
     private final String errorCode;
     private final Object[] args;
 
-    public BusinessException(String errorCode, String message) {
-        super(message);
-        this.errorCode = errorCode;
-        this.args = new Object[0];
-    }
-
-    public BusinessException(String errorCode, String message, Object... args) {
-        super(message);
+    public BusinessException(String errorCode, Object... args) {
+        super(errorCode);
         this.errorCode = errorCode;
         this.args = args;
     }
