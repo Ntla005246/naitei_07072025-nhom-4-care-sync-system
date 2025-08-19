@@ -37,8 +37,10 @@ public class DoctorMapper {
             return Collections.emptyList();
         }
 
-        return doctors.stream().map(this::toDto).filter(Optional::isPresent).map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
+		return doctors.stream()
+				.map(this::toDto)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toList());
+	}
 }

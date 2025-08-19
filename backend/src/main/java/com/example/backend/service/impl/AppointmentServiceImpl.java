@@ -1,5 +1,14 @@
 package com.example.backend.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.backend.dto.AppointmentCreateRequest;
 import com.example.backend.dto.AppointmentCreateResponse;
 import com.example.backend.entity.Appointment;
@@ -20,10 +29,9 @@ import com.example.backend.mapper.AppointmentMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +114,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return AppointmentMapper.buildFromServices(savedAppt, patient, slot, services, total,
                 request.notes());
     }
-
+    
     @Override
     @Transactional
     public AppointmentCreateResponse confirm(Long appointmentId) {

@@ -4,10 +4,9 @@ import java.util.List;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,22 +40,12 @@ public class DoctorController {
         return ApiResponse.success(doctors, message);
     }
 
-    @GetMapping("/specialty/{specialtyId}")
-    @Operation(summary = "Get doctors by specialty", description = "Retrieve doctors filtered by specialty ID")
-    public ApiResponse<List<DoctorDto>> getDoctorsBySpecialty(@PathVariable Long specialtyId) {
-        List<DoctorDto> doctors = doctorService.getDoctorsBySpecialty(specialtyId);
-        String message = messageSource.getMessage("success.doctors.by.specialty.retrieved", null,
-                LocaleContextHolder.getLocale());
-        return ApiResponse.success(doctors, message);
-    }
-
-    @GetMapping("/search")
-    @Operation(summary = "Search doctors with pagination", description = "Search and filter doctors with pagination support")
-    public ApiResponse<PageResponse<DoctorDto>> searchDoctors(
-            @ModelAttribute DoctorSearchRequest request) {
-        PageResponse<DoctorDto> result = doctorService.searchDoctors(request);
-        String message = messageSource.getMessage("success.operation", null,
-                LocaleContextHolder.getLocale());
-        return ApiResponse.success(result, message);
-    }
+	@GetMapping("/search")
+	@Operation(summary = "Search doctors with pagination", description = "Search and filter doctors with pagination support")
+	public ApiResponse<PageResponse<DoctorDto>> searchDoctors(@ModelAttribute DoctorSearchRequest request) {
+		PageResponse<DoctorDto> result = doctorService.searchDoctors(request);
+		String message = messageSource.getMessage("success.operation", null,
+				LocaleContextHolder.getLocale());
+		return ApiResponse.success(result, message);
+	}
 }

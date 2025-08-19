@@ -1,20 +1,25 @@
 package com.example.backend.controller;
 
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.backend.constant.ApiConstants;
 import com.example.backend.dto.ApiResponse;
 import com.example.backend.dto.PageResponse;
 import com.example.backend.dto.SpecialtyDto;
 import com.example.backend.dto.SpecialtySearchRequest;
+import com.example.backend.service.DoctorService;
 import com.example.backend.service.SpecialtyService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(ApiConstants.SPECIALTIES_ENDPOINT)
@@ -24,6 +29,7 @@ import jakarta.validation.Valid;
 public class SpecialtyController {
 
     private final SpecialtyService specialtyService;
+    private final DoctorService doctorService;
     private final MessageSource messageSource;
 
     @GetMapping("/search")
@@ -39,5 +45,13 @@ public class SpecialtyController {
                 LocaleContextHolder.getLocale());
 
         return ApiResponse.success(result, message);
+    }
+    @GetMapping("/{specialtyId}/doctors")
+    @Operation(summary = "Get doctors by specialty", description = "Retrieve doctors filtered by specialty ID")
+    public ApiResponse<List<DoctorDto>> getDoctorsBySpecialty(@PathVariable Long specialtyId) {
+        List<DoctorDto> doctors = doctorService.getDoctorsBySpecialty(specialtyId);
+        String message = messageSource.getMessage("success.doctors.by.specialty.retrieved", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(doctors, message);
     }
 }

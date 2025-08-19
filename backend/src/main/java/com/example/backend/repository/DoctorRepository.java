@@ -32,5 +32,4 @@ public interface DoctorRepository
             WHERE d.specialty.id = :specialtyId
             """)
     List<Doctor> findBySpecialty(@Param("specialtyId") Long specialtyId);
-
 }

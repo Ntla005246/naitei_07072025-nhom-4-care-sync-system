@@ -1,24 +1,24 @@
 package com.example.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class DoctorDto {
-    private Long id;
-    private String fullName;
-    private String email;
-    private String phone;
-    private String title;
-    private String specialtyName;
-    private Integer experienceYears;
-    private String bio;
-    private BigDecimal consultationFee;
-}
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
+
+public record DoctorDto(
+    Long id,
+    String fullName,
+    @Email(message = "email must be valid")
+    String email,
+    @Pattern(regexp = "^[+\\d\\s().-]{8,20}$", message = "phone number is invalid")
+    String phone,
+    String title,
+    String specialtyName,
+    @PositiveOrZero(message = "experienceYears must be >= 0")
+    Integer experienceYears,
+    String bio,
+    @DecimalMin(value = "0.0", inclusive = true, message = "consultationFee must be >= 0")
+    BigDecimal consultationFee
+) {}
