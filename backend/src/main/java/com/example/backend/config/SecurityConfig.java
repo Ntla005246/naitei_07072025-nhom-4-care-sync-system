@@ -32,10 +32,13 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**",
             ApiConstants.SPECIALTIES_ENDPOINT + "/**"};
 
-    private static final String[] PATIENT_ENDPOINTS = {ApiConstants.APPOINTMENTS_ENDPOINT + "/**",
-            "/payments/**", "/notifications/**", "/feedback/**"};
+    private static final String[] PATIENT_ENDPOINTS = {
+            ApiConstants.PATIENT_APPOINTMENTS_ENDPOINT + "/**", "/payments/**", "/notifications/**",
+            "/feedback/**"};
 
-    private static final String[] DOCTOR_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**"};
+    private static final String[] DOCTOR_ENDPOINTS = {
+            ApiConstants.DOCTOR_APPOINTMENTS_ENDPOINT + "/**",
+            ApiConstants.DOCTOR_TIME_OFF_ENDPOINT + "/**"};
 
     private static final String[] ADMIN_ENDPOINTS = {ApiConstants.ADMIN_ENDPOINT + "/**"};
 

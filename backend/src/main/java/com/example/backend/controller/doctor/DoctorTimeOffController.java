@@ -1,4 +1,4 @@
-package com.example.backend.controller;
+package com.example.backend.controller.doctor;
 
 import com.example.backend.constant.ApiConstants;
 import com.example.backend.dto.ApiResponse;

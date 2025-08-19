@@ -1,27 +1,23 @@
-package com.example.backend.controller;
+package com.example.backend.controller.patient;
 
 import com.example.backend.constant.ApiConstants;
-
-import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.AppointmentCreateRequest;
-import com.example.backend.dto.AppointmentCreateResponse;
+import com.example.backend.dto.*;
 import com.example.backend.service.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(ApiConstants.APPOINTMENTS_ENDPOINT)
+@RequestMapping(ApiConstants.PATIENT_APPOINTMENTS_ENDPOINT)
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Appointments")
-public class AppointmentController {
+@Tag(name = "Patient Appointments", description = "Patient appointment management APIs")
+public class PatientAppointmentController {
 
     private final AppointmentService appointmentService;
     private final MessageSource messageSource;

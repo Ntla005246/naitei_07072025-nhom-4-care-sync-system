@@ -2,15 +2,9 @@ package com.example.backend.service.impl;
 
 import com.example.backend.dto.AppointmentCreateRequest;
 import com.example.backend.dto.AppointmentCreateResponse;
-import com.example.backend.dto.AppointmentCreateResponse.DoctorInfo;
-import com.example.backend.dto.AppointmentCreateResponse.ServiceItem;
-import com.example.backend.dto.AppointmentCreateResponse.SlotInfo;
 import com.example.backend.entity.Appointment;
 import com.example.backend.entity.AppointmentSlot;
-import com.example.backend.entity.Doctor;
 import com.example.backend.entity.Patient;
-import com.example.backend.entity.Specialty;
-import com.example.backend.entity.User;
 import com.example.backend.entity.ids.AppointmentServiceId;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -20,11 +14,12 @@ import com.example.backend.repository.AppointmentSlotRepository;
 import com.example.backend.repository.PatientRepository;
 import com.example.backend.repository.ServiceRepository;
 import com.example.backend.service.AppointmentService;
+import com.example.backend.dto.AppointmentRejectRequest;
+import com.example.backend.constant.enums.AppointmentStatus;
+import com.example.backend.mapper.AppointmentMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,8 +67,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         Long slotSpecialtyId = slot.getDoctor().getSpecialty() != null
                 ? slot.getDoctor().getSpecialty().getId().longValue()
                 : null;
-        boolean allMatch = services.stream().allMatch(svc -> svc.getSpecialty() != null
-                && Objects.equals(svc.getSpecialty().getId().longValue(), slotSpecialtyId));
+        boolean allMatch = services.stream()
+                .allMatch(svc -> svc.getSpecialty() != null && java.util.Objects
+                        .equals(svc.getSpecialty().getId().longValue(), slotSpecialtyId));
         if (!allMatch) {
             throw new BusinessException("error.service.specialty.mismatch");
         }
@@ -91,7 +87,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BusinessException("error.appointment.slot.unavailable");
         }
 
-        // Build AppointmentService rows and total
+        // Build AppointmentService rows and persist priceAtBooking
         List<com.example.backend.entity.AppointmentService> appointmentServices = services.stream()
                 .map(svc -> {
                     var as = new com.example.backend.entity.AppointmentService();
@@ -101,27 +97,71 @@ public class AppointmentServiceImpl implements AppointmentService {
                     as.setPriceAtBooking(svc.getPrice());
                     return as;
                 }).toList();
-
         appointmentServiceRepository.saveAll(appointmentServices);
 
         BigDecimal total = appointmentServices.stream()
                 .map(com.example.backend.entity.AppointmentService::getPriceAtBooking)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Build response
-        Doctor doctor = slot.getDoctor();
-        Specialty specialty = doctor.getSpecialty();
-        User user = doctor.getUser();
-        return new AppointmentCreateResponse(savedAppt.getId(), patient.getId(),
-                new SlotInfo(slot.getStartTime(), slot.getEndTime(), doctor.getId()),
-                new DoctorInfo(doctor.getId(),
-                        Optional.ofNullable(user).map(User::getFullName).orElse(null),
-                        Optional.ofNullable(specialty).map(s -> s.getId().longValue()).orElse(null),
-                        Optional.ofNullable(specialty).map(Specialty::getName).orElse(null)),
-                savedAppt.getStatus().name(),
-                services.stream()
-                        .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
-                        .toList(),
-                total, request.notes());
+        return AppointmentMapper.buildFromServices(savedAppt, patient, slot, services, total,
+                request.notes());
+    }
+
+    @Override
+    @Transactional
+    public AppointmentCreateResponse confirm(Long appointmentId) {
+        log.info("Confirm appointment: {}", appointmentId);
+        var appt = appointmentRepository.findById(appointmentId).orElseThrow(
+                () -> new ResourceNotFoundException("error.appointment.not.found", appointmentId));
+
+        if (appt.getStatus() != AppointmentStatus.PENDING) {
+            throw new BusinessException("error.appointment.invalid.state", appt.getStatus().name());
+        }
+
+        var slot = appointmentSlotRepository.findByAppointmentId(appointmentId);
+        if (slot == null) {
+            throw new BusinessException("error.appointment.slot.missing");
+        }
+        if (slot.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("error.appointment.cannot.confirm.after.start");
+        }
+
+        appt.setStatus(AppointmentStatus.CONFIRMED);
+        var saved = appointmentRepository.save(appt);
+
+        var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
+        return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
+    }
+
+    @Override
+    @Transactional
+    public AppointmentCreateResponse reject(Long appointmentId, AppointmentRejectRequest request) {
+        log.info("Reject appointment: {}, reason: {}", appointmentId, request.reason());
+        var appt = appointmentRepository.findById(appointmentId).orElseThrow(
+                () -> new ResourceNotFoundException("error.appointment.not.found", appointmentId));
+
+        if (appt.getStatus() != AppointmentStatus.PENDING
+                && appt.getStatus() != AppointmentStatus.CONFIRMED) {
+            throw new BusinessException("error.appointment.invalid.state", appt.getStatus().name());
+        }
+
+        var slot = appointmentSlotRepository.findByAppointmentId(appointmentId);
+        if (slot == null) {
+            throw new BusinessException("error.appointment.slot.missing");
+        }
+
+        // policy: không cho hủy sau giờ bắt đầu
+        if (slot.getStartTime().isBefore(LocalDateTime.now())) {
+            throw new BusinessException("error.appointment.cannot.reject.after.start");
+        }
+
+        appt.setStatus(AppointmentStatus.REJECTED);
+        var saved = appointmentRepository.save(appt);
+
+        // free slot (CAS)
+        appointmentSlotRepository.freeSlotByAppointmentId(saved.getId());
+
+        var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
+        return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
     }
 }
