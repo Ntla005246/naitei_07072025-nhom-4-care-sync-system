@@ -32,7 +32,8 @@ public class AppointmentController {
             @Valid @RequestBody AppointmentCreateRequest request) {
         log.info("Create appointment: {}", request);
         var resp = appointmentService.create(request);
-        String message = messageSource.getMessage("success.appointment.created", null, LocaleContextHolder.getLocale());
+        String message = messageSource.getMessage("success.appointment.created", null,
+                LocaleContextHolder.getLocale());
         return ApiResponse.success(resp, message);
     }
 }

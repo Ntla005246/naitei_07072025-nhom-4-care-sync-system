@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Xác thực Email</title>
+</head>
+<body>
+    <h3>
+        Chào <span th:text="${userName}">bạn</span>,
+    </h3>
+    <p>Cảm ơn bạn đã đăng ký tài khoản tại Care Sync. Vui lòng nhấp
+        vào liên kết bên dưới để hoàn tất việc xác thực. Liên kết này sẽ
+        hết hạn sau 24 giờ.</p>
+    <p>
+        <a th:href="${verificationUrl}" style="color: #1a73e8;">Kích
+            hoạt tài khoản của tôi</a>
+    </p>
+    <p>
+        Trân trọng,<br />Đội ngũ Care Sync
+    </p>
+</body>
+</html>

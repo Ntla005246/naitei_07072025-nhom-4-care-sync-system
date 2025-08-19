@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.Set;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -42,6 +43,12 @@ public class User extends BaseEntity {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "token_expiry_date")
+    private LocalDateTime tokenExpiryDate;
 
     // Association
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

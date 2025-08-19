@@ -36,3 +36,5 @@ build/
 mvnw
 mvnw.cmd
 src/main/resources/application.yml
+
+.DS_Store

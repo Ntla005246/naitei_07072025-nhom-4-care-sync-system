@@ -26,7 +26,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {ApiConstants.AUTH_ENDPOINT + "/**",
-            "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**"};
+            "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**",
+            "/api/v1/auth/verify-email"};
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/**",
             ApiConstants.SPECIALTIES_ENDPOINT + "/**"};

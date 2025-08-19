@@ -46,43 +46,32 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorMapper.toDtoList(doctors);
     }
 
-    //search and paging
+    // search and paging
     @Override
-    public PageResponse<DoctorDto> searchDoctors(DoctorSearchRequest request){
+    public PageResponse<DoctorDto> searchDoctors(DoctorSearchRequest request) {
         String sortBy = validateSortBy(request.sortBy());
 
-        PageRequest pageRequest = PageRequest.of(
-                request.page(),
-                request.size(),
-                Sort.by(Sort.Direction.fromString(request.sortDirection().toUpperCase()), sortBy)
-        );
+        PageRequest pageRequest = PageRequest.of(request.page(), request.size(),
+                Sort.by(Sort.Direction.fromString(request.sortDirection().toUpperCase()), sortBy));
 
-        Specification<Doctor> spec = Specification.allOf(
-                DoctorSpecifications.userIsActive(),
+        Specification<Doctor> spec = Specification.allOf(DoctorSpecifications.userIsActive(),
                 DoctorSpecifications.searchTerm(request.searchTerm()),
                 DoctorSpecifications.specialtyId(request.specialtyId()),
                 DoctorSpecifications.experienceMin(request.minExperience()),
                 DoctorSpecifications.experienceMax(request.maxExperience()),
                 DoctorSpecifications.feeMin(request.minFee()),
-                DoctorSpecifications.feeMax(request.maxFee())
-        );
+                DoctorSpecifications.feeMax(request.maxFee()));
 
         Page<Doctor> doctorPage = doctorRepository.findAll(spec, pageRequest);
 
         List<DoctorDto> doctorDtos = doctorMapper.toDtoList(doctorPage.getContent());
 
-        return PageResponse.<DoctorDto>builder()
-                .content(doctorDtos)
-                .pageable(PageResponse.PageableInfo.builder()
-                        .page(doctorPage.getNumber())
-                        .size(doctorPage.getSize())
-                        .totalElements(doctorPage.getTotalElements())
-                        .totalPages(doctorPage.getTotalPages())
-                        .first(doctorPage.isFirst())
-                        .last(doctorPage.isLast())
-                        .hasNext(doctorPage.hasNext())
-                        .hasPrevious(doctorPage.hasPrevious())
-                        .build())
+        return PageResponse.<DoctorDto>builder().content(doctorDtos)
+                .pageable(PageResponse.PageableInfo.builder().page(doctorPage.getNumber())
+                        .size(doctorPage.getSize()).totalElements(doctorPage.getTotalElements())
+                        .totalPages(doctorPage.getTotalPages()).first(doctorPage.isFirst())
+                        .last(doctorPage.isLast()).hasNext(doctorPage.hasNext())
+                        .hasPrevious(doctorPage.hasPrevious()).build())
                 .build();
     }
 

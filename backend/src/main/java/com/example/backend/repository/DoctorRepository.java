@@ -10,7 +10,10 @@ import org.springframework.stereotype.Repository;
 import com.example.backend.entity.Doctor;
 
 @Repository
-public interface DoctorRepository extends JpaRepository<Doctor, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Doctor> {
+public interface DoctorRepository
+        extends
+            JpaRepository<Doctor, Long>,
+            org.springframework.data.jpa.repository.JpaSpecificationExecutor<Doctor> {
 
     @Query("""
             SELECT d
@@ -29,6 +32,5 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long>, org.sprin
             WHERE d.specialty.id = :specialtyId
             """)
     List<Doctor> findBySpecialty(@Param("specialtyId") Long specialtyId);
-
 
 }
