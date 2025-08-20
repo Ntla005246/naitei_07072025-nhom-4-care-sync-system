@@ -14,6 +14,7 @@ import com.example.backend.dto.AppointmentCreateResponse;
 import com.example.backend.entity.Appointment;
 import com.example.backend.entity.AppointmentSlot;
 import com.example.backend.entity.Patient;
+import com.example.backend.entity.User;
 import com.example.backend.entity.ids.AppointmentServiceId;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -22,16 +23,28 @@ import com.example.backend.repository.AppointmentServiceRepository;
 import com.example.backend.repository.AppointmentSlotRepository;
 import com.example.backend.repository.PatientRepository;
 import com.example.backend.repository.ServiceRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppointmentService;
-import com.example.backend.dto.AppointmentRejectRequest;
-import com.example.backend.constant.enums.AppointmentStatus;
-import com.example.backend.mapper.AppointmentMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.example.backend.dto.AppointmentListRequest;
+import com.example.backend.dto.AppointmentSummaryDto;
+import com.example.backend.dto.PageResponse;
+import com.example.backend.util.SecurityUtils;
+import com.example.backend.constant.enums.AppointmentStatus;
+import com.example.backend.dto.AppointmentRejectRequest;
+import com.example.backend.mapper.AppointmentMapper;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +56,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentServiceRepository appointmentServiceRepository;
     private final ServiceRepository serviceRepository;
     private final PatientRepository patientRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -171,5 +185,37 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<AppointmentSummaryDto> listMyAppointments(AppointmentListRequest request) {
+        String email = SecurityUtils.getCurrentUserEmailOrThrow();
+
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new com.example.backend.exception.UnauthorizedException(
+                        "error.user.not.found"));
+        if (currentUser.getDoctor() == null) {
+            throw new AccessDeniedException("error.access.denied");
+        }
+        Long doctorId = currentUser.getDoctor().getId();
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        Page<Appointment> page = appointmentRepository.findByDoctorWithFilters(doctorId,
+                request.getStatus(), request.getStartFrom(), request.getStartTo(), pageable);
+
+        List<AppointmentSummaryDto> summaries = page.getContent().stream().map(a -> {
+            AppointmentSlot s = a.getAppointmentSlot();
+            Patient p = a.getPatient();
+            return new AppointmentSummaryDto(a.getId(), s != null ? s.getStartTime() : null,
+                    s != null ? s.getEndTime() : null,
+                    a.getStatus() != null ? a.getStatus().name() : null,
+                    p != null ? p.getId() : null,
+                    p != null && p.getUser() != null ? p.getUser().getFullName() : null);
+        }).toList();
+
+        Page<AppointmentSummaryDto> dtoPage = new PageImpl<>(summaries, pageable,
+                page.getTotalElements());
+        return PageResponse.of(dtoPage);
     }
 }

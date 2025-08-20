@@ -22,6 +22,17 @@ public class DoctorAppointmentController {
     private final AppointmentService appointmentService;
     private final MessageSource messageSource;
 
+    @GetMapping("/me")
+    @Operation(summary = "List current doctor's appointments with pagination and filters")
+    public ApiResponse<PageResponse<AppointmentSummaryDto>> listMyAppointments(
+            @Valid @ModelAttribute AppointmentListRequest request) {
+        log.info("Listing my appointments: {}", request);
+        PageResponse<AppointmentSummaryDto> result = appointmentService.listMyAppointments(request);
+        String message = messageSource.getMessage("success.operation", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(result, message);
+    }
+
     @PutMapping("/{id}/confirm")
     @Operation(summary = "Doctor confirms an appointment")
     public ApiResponse<AppointmentCreateResponse> confirm(@PathVariable Long id) {
