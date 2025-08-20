@@ -1,7 +1,12 @@
 package com.example.backend.controller.patient;
 
 import com.example.backend.constant.ApiConstants;
-import com.example.backend.dto.*;
+
+import com.example.backend.dto.ApiResponse;
+import com.example.backend.dto.AppointmentCreateRequest;
+import com.example.backend.dto.AppointmentCreateResponse;
+import com.example.backend.dto.AppointmentCancelRequest;
+import com.example.backend.dto.AppointmentCancelResponse;
 import com.example.backend.service.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(ApiConstants.PATIENT_APPOINTMENTS_ENDPOINT)
 @RequiredArgsConstructor
@@ -52,5 +58,19 @@ public class PatientAppointmentController {
         String message = messageSource.getMessage("success.appointment.created", null,
                 LocaleContextHolder.getLocale());
         return ResponseEntity.ok(ApiResponse.success(response, message));
+    }
+
+    @PutMapping("/{id}/cancel")
+    @Operation(summary = "Cancel an appointment (owner only; release slot to AVAILABLE)")
+    public ApiResponse<AppointmentCancelResponse> cancel(@PathVariable("id") Long appointmentId,
+            @Valid @RequestBody AppointmentCancelRequest request) {
+
+        log.info("Cancel appointment id={}, confirmPolicy={}, reason={}", appointmentId,
+                request.confirmPolicy(), request.reason());
+
+        var resp = appointmentService.cancelByPatient(appointmentId, request.confirmPolicy());
+        String message = messageSource.getMessage("success.appointment.cancelled", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(resp, message);
     }
 }

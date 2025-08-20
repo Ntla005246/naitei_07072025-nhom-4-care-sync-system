@@ -10,6 +10,7 @@ import com.example.backend.dto.AppointmentSummaryResponse;
 import com.example.backend.dto.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.example.backend.dto.AppointmentCancelResponse;
 
 public interface AppointmentService {
     AppointmentCreateResponse create(AppointmentCreateRequest request);
@@ -18,4 +19,5 @@ public interface AppointmentService {
     Page<AppointmentSummaryResponse> getMyAppointments(AppointmentFilterRequest filters,
             Pageable pageable);
     PageResponse<AppointmentSummaryDto> listDoctorAppointments(AppointmentListRequest request);
+    AppointmentCancelResponse cancelByPatient(Long appointmentId, Boolean confirmPolicy);
 }

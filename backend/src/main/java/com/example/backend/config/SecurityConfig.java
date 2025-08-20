@@ -94,7 +94,9 @@ public class SecurityConfig {
                         .requestMatchers(PAYMENT_ENDPOINTS).authenticated()
                         .requestMatchers(ApiConstants.DOCTORS_ENDPOINT + "/me/**").authenticated()
                         .requestMatchers(DOCTOR_ENDPOINTS).hasRole("DOCTOR")
-                        .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN").anyRequest()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/error", "/error/**").permitAll().anyRequest()
                         .authenticated());
 
 		return http.build();
