@@ -5,6 +5,8 @@ import com.example.backend.dto.AppointmentCreateResponse;
 import com.example.backend.dto.AppointmentCreateResponse.DoctorInfo;
 import com.example.backend.dto.AppointmentCreateResponse.ServiceItem;
 import com.example.backend.dto.AppointmentCreateResponse.SlotInfo;
+import com.example.backend.dto.AppointmentRescheduleRequest;
+import com.example.backend.dto.AppointmentRescheduleResponse;
 import com.example.backend.entity.Appointment;
 import com.example.backend.entity.AppointmentSlot;
 import com.example.backend.entity.Doctor;
@@ -20,6 +22,7 @@ import com.example.backend.repository.AppointmentSlotRepository;
 import com.example.backend.repository.PatientRepository;
 import com.example.backend.repository.ServiceRepository;
 import com.example.backend.service.AppointmentService;
+import com.example.backend.constant.enums.AppointmentSlotStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +44,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentServiceRepository appointmentServiceRepository;
     private final ServiceRepository serviceRepository;
     private final PatientRepository patientRepository;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -123,5 +128,82 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
                         .toList(),
                 total, request.notes());
+    }
+
+    @Override
+    @Transactional
+    public AppointmentRescheduleResponse reschedule(Long appointmentId,
+            AppointmentRescheduleRequest request) {
+
+        if (request.confirmPolicy() == null || !request.confirmPolicy()) {
+            throw new BusinessException("error.policy.not.confirmed");
+        }
+
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("error.appointment.not.found"));
+
+        switch (appt.getStatus()) {
+            case PENDING :
+            case CONFIRMED :
+                break;
+            default :
+                throw new BusinessException("error.appointment.status.invalid",
+                        appt.getStatus().name());
+        }
+
+        if (request.patientId() != null) {
+            if (appt.getPatient() == null || appt.getPatient().getId() == null
+                    || !appt.getPatient().getId().equals(request.patientId())) {
+                throw new BusinessException("error.access.denied");
+            }
+        }
+
+        AppointmentSlot oldSlot = appt.getAppointmentSlot();
+        if (oldSlot == null) {
+            throw new BusinessException("error.appointment.slot.missing");
+        }
+
+        AppointmentSlot newSlot = appointmentSlotRepository.findById(request.newSlotId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("error.appointment.slot.not.found"));
+
+        if (newSlot.getStatus() != AppointmentSlotStatus.AVAILABLE) {
+            throw new BusinessException("error.slot.not.available");
+        }
+
+        if (oldSlot.getDoctor() != null && newSlot.getDoctor() != null
+                && !oldSlot.getDoctor().getId().equals(newSlot.getDoctor().getId())) {
+            throw new BusinessException("error.slot.doctor.mismatch");
+        }
+
+        var oldInfo = new AppointmentRescheduleResponse.SlotInfo(oldSlot.getStartTime(),
+                oldSlot.getEndTime(),
+                oldSlot.getDoctor() != null ? oldSlot.getDoctor().getId() : null);
+
+        int released = appointmentSlotRepository.releaseSlot(oldSlot.getId(), appt.getId());
+        if (released != 1) {
+            throw new BusinessException("error.appointment.slot.release.failed");
+        }
+
+        int reserved = appointmentSlotRepository.reserveSlot(newSlot.getId(), appt.getId());
+        if (reserved != 1) {
+            throw new BusinessException("error.slot.not.available");
+        }
+
+        appt.setAppointmentSlot(newSlot);
+        appointmentRepository.save(appt);
+
+        var newInfo = new AppointmentRescheduleResponse.SlotInfo(newSlot.getStartTime(),
+                newSlot.getEndTime(),
+                newSlot.getDoctor() != null ? newSlot.getDoctor().getId() : null);
+
+        String policyMsg = messageSource.getMessage("policy.appointment.reschedule", null,
+                org.springframework.context.i18n.LocaleContextHolder.getLocale());
+
+        // TODO: Gửi thông báo (email/notification)
+        boolean notificationQueued = false;
+
+        return new AppointmentRescheduleResponse(appt.getId(), oldInfo, newInfo,
+                appt.getStatus().name(), policyMsg, notificationQueued);
     }
 }
