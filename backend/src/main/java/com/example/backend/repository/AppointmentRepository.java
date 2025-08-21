@@ -2,17 +2,18 @@ package com.example.backend.repository;
 
 import com.example.backend.constant.enums.AppointmentStatus;
 import com.example.backend.entity.Appointment;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-
 @Repository
-public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
+        JpaSpecificationExecutor<Appointment> {
 
     @Query("""
             SELECT a FROM Appointment a
@@ -24,6 +25,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             ORDER BY s.startTime DESC
             """)
     Page<Appointment> findByDoctorWithFilters(@Param("doctorId") Long doctorId,
-            @Param("status") AppointmentStatus status, @Param("startFrom") LocalDateTime startFrom,
-            @Param("startTo") LocalDateTime startTo, Pageable pageable);
+                                              @Param("status") AppointmentStatus status, @Param("startFrom") LocalDateTime startFrom,
+                                              @Param("startTo") LocalDateTime startTo, Pageable pageable);
 }

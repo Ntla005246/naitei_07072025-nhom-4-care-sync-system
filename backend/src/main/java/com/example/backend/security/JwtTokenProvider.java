@@ -26,27 +26,26 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        // convert chuỗi secret thành key hợp lệ
         signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String email) { // ĐÃ SỬA
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        return Jwts.builder().setSubject(username).setIssuedAt(now).setExpiration(expiryDate)
+        return Jwts.builder().setSubject(email).setIssuedAt(now).setExpiration(expiryDate)
                 .signWith(signingKey, SignatureAlgorithm.HS256).compact();
     }
 
-    public String generateRefreshToken(String username) {
+    public String generateRefreshToken(String email) { // ĐÃ SỬA
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshExpirationMs);
 
-        return Jwts.builder().setSubject(username).setIssuedAt(now).setExpiration(expiryDate)
+        return Jwts.builder().setSubject(email).setIssuedAt(now).setExpiration(expiryDate)
                 .signWith(signingKey, SignatureAlgorithm.HS256).compact();
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getEmailFromToken(String token) { // ĐÃ SỬA
         return Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token)
                 .getBody().getSubject();
     }

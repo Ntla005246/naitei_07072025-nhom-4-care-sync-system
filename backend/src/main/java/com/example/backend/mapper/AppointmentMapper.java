@@ -4,6 +4,7 @@ import com.example.backend.dto.AppointmentCreateResponse;
 import com.example.backend.dto.AppointmentCreateResponse.DoctorInfo;
 import com.example.backend.dto.AppointmentCreateResponse.ServiceItem;
 import com.example.backend.dto.AppointmentCreateResponse.SlotInfo;
+import com.example.backend.dto.AppointmentSummaryResponse;
 import com.example.backend.entity.Appointment;
 import com.example.backend.entity.AppointmentSlot;
 import com.example.backend.entity.Doctor;
@@ -13,14 +14,19 @@ import com.example.backend.entity.User;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public final class AppointmentMapper {
-    private AppointmentMapper() {
-    }
+@Mapper(componentModel = "spring")
+public interface AppointmentMapper {
 
-    public static AppointmentCreateResponse buildFromServices(Appointment savedAppt,
-            Patient patient, AppointmentSlot slot,
-            List<com.example.backend.entity.Service> services, BigDecimal total, String notes) {
+    @Mapping(source = "appointmentSlot.doctor.user.fullName", target = "doctorName")
+    @Mapping(source = "appointmentSlot.doctor.specialty.name", target = "specialtyName")
+    AppointmentSummaryResponse toAppointmentSummaryResponse(Appointment appointment);
+
+    static AppointmentCreateResponse buildFromServices(Appointment savedAppt, Patient patient,
+                                                       AppointmentSlot slot, List<com.example.backend.entity.Service> services,
+                                                       BigDecimal total, String notes) {
         Doctor doctor = slot.getDoctor();
         Specialty specialty = doctor.getSpecialty();
         User user = doctor.getUser();
@@ -28,18 +34,18 @@ public final class AppointmentMapper {
                 new SlotInfo(slot.getStartTime(), slot.getEndTime(), doctor.getId()),
                 new DoctorInfo(doctor.getId(),
                         Optional.ofNullable(user).map(User::getFullName).orElse(null),
-                        Optional.ofNullable(specialty).map(s -> s.getId().longValue()).orElse(null),
+                        Optional.ofNullable(specialty).map(s -> s.getId().longValue())
+                                .orElse(null),
                         Optional.ofNullable(specialty).map(Specialty::getName).orElse(null)),
-                savedAppt.getStatus().name(),
-                services.stream()
-                        .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
-                        .toList(),
+                savedAppt.getStatus().name(), services.stream()
+                .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
+                .toList(),
                 total, notes);
     }
 
-    public static AppointmentCreateResponse buildFromAppointmentServices(Appointment appt,
-            AppointmentSlot slot,
-            List<com.example.backend.entity.AppointmentService> apptServices) {
+    static AppointmentCreateResponse buildFromAppointmentServices(Appointment appt,
+                                                                  AppointmentSlot slot,
+                                                                  List<com.example.backend.entity.AppointmentService> apptServices) {
         Doctor doctor = slot.getDoctor();
         Specialty specialty = doctor.getSpecialty();
         User user = doctor.getUser();
@@ -50,13 +56,13 @@ public final class AppointmentMapper {
                 new SlotInfo(slot.getStartTime(), slot.getEndTime(), doctor.getId()),
                 new DoctorInfo(doctor.getId(),
                         Optional.ofNullable(user).map(User::getFullName).orElse(null),
-                        Optional.ofNullable(specialty).map(s -> s.getId().longValue()).orElse(null),
+                        Optional.ofNullable(specialty).map(s -> s.getId().longValue())
+                                .orElse(null),
                         Optional.ofNullable(specialty).map(Specialty::getName).orElse(null)),
-                appt.getStatus().name(),
-                apptServices.stream()
-                        .map(as -> new ServiceItem(as.getService().getId(),
-                                as.getService().getName(), as.getPriceAtBooking()))
-                        .toList(),
+                appt.getStatus().name(), apptServices.stream()
+                .map(as -> new ServiceItem(as.getService().getId(),
+                        as.getService().getName(), as.getPriceAtBooking()))
+                .toList(),
                 total, appt.getNotes());
     }
 }

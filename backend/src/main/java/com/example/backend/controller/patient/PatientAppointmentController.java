@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,17 +22,35 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Patient Appointments", description = "Patient appointment management APIs")
 public class PatientAppointmentController {
 
+    private static final String ME_ENDPOINT = "/me";
+
     private final AppointmentService appointmentService;
     private final MessageSource messageSource;
 
+    @GetMapping(ME_ENDPOINT)
+    @Operation(summary = "Get my appointments with filters and pagination")
+    public ResponseEntity<ApiResponse<PageResponse<AppointmentSummaryResponse>>> getMyAppointments(
+            @Valid @ModelAttribute AppointmentFilterRequest filters, Pageable pageable) {
+
+        Page<AppointmentSummaryResponse> appointmentsPage = appointmentService
+                .getMyAppointments(filters, pageable);
+
+        PageResponse<AppointmentSummaryResponse> pageResponse = PageResponse.of(appointmentsPage);
+
+        String successMessage = messageSource.getMessage("success.appointments.retrieved", null,
+                LocaleContextHolder.getLocale());
+
+        return ResponseEntity.ok(ApiResponse.success(pageResponse, successMessage));
+    }
+
     @PostMapping
-    @Operation(summary = "Create appointment from an AVAILABLE slot")
-    public ApiResponse<AppointmentCreateResponse> create(
+    @Operation(summary = "Create an appointment from an AVAILABLE slot")
+    public ResponseEntity<ApiResponse<AppointmentCreateResponse>> create(
             @Valid @RequestBody AppointmentCreateRequest request) {
-        log.info("Create appointment: {}", request);
-        var resp = appointmentService.create(request);
+        log.info("Request to create appointment: {}", request);
+        AppointmentCreateResponse response = appointmentService.create(request);
         String message = messageSource.getMessage("success.appointment.created", null,
                 LocaleContextHolder.getLocale());
-        return ApiResponse.success(resp, message);
+        return ResponseEntity.ok(ApiResponse.success(response, message));
     }
 }

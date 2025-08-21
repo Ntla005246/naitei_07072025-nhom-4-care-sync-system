@@ -1,50 +1,35 @@
 package com.example.backend.service.impl;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.example.backend.dto.AppointmentCreateRequest;
-import com.example.backend.dto.AppointmentCreateResponse;
-import com.example.backend.entity.Appointment;
-import com.example.backend.entity.AppointmentSlot;
-import com.example.backend.entity.Patient;
-import com.example.backend.entity.User;
+import com.example.backend.constant.enums.AppointmentStatus;
+import com.example.backend.dto.*;
+import com.example.backend.entity.*;
 import com.example.backend.entity.ids.AppointmentServiceId;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
-import com.example.backend.repository.AppointmentRepository;
-import com.example.backend.repository.AppointmentServiceRepository;
-import com.example.backend.repository.AppointmentSlotRepository;
-import com.example.backend.repository.PatientRepository;
-import com.example.backend.repository.ServiceRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.exception.UnauthorizedException;
+import com.example.backend.mapper.AppointmentMapper;
+import com.example.backend.repository.*;
 import com.example.backend.service.AppointmentService;
+import com.example.backend.util.SecurityUtils;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Locale;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.backend.dto.AppointmentListRequest;
-import com.example.backend.dto.AppointmentSummaryDto;
-import com.example.backend.dto.PageResponse;
-import com.example.backend.util.SecurityUtils;
-import com.example.backend.constant.enums.AppointmentStatus;
-import com.example.backend.dto.AppointmentRejectRequest;
-import com.example.backend.mapper.AppointmentMapper;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +42,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ServiceRepository serviceRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final AppointmentMapper appointmentMapper;
+    private final MessageSource messageSource;
 
     @Override
     @Transactional
@@ -78,38 +65,33 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("error.patient.not.found",
                         request.patientId()));
 
-        // Load services
         List<com.example.backend.entity.Service> services = serviceRepository
                 .findAllById(request.serviceIds());
         if (services.size() != request.serviceIds().size()) {
             throw new ResourceNotFoundException("error.service.not.found");
         }
 
-        // Validate specialty match
         Long slotSpecialtyId = slot.getDoctor().getSpecialty() != null
                 ? slot.getDoctor().getSpecialty().getId().longValue()
                 : null;
         boolean allMatch = services.stream()
-                .allMatch(svc -> svc.getSpecialty() != null && java.util.Objects
+                .allMatch(svc -> svc.getSpecialty() != null && Objects
                         .equals(svc.getSpecialty().getId().longValue(), slotSpecialtyId));
         if (!allMatch) {
             throw new BusinessException("error.service.specialty.mismatch");
         }
 
-        // Create Appointment (PENDING)
         Appointment appointmentToSave = new Appointment();
         appointmentToSave.setPatient(patient);
         appointmentToSave.setNotes(request.notes());
         appointmentToSave.setStatus(com.example.backend.constant.enums.AppointmentStatus.PENDING);
         final Appointment savedAppt = appointmentRepository.save(appointmentToSave);
 
-        // Reserve slot via CAS
         int updated = appointmentSlotRepository.reserveSlot(slot.getId(), savedAppt.getId());
         if (updated == 0) {
             throw new BusinessException("error.appointment.slot.unavailable");
         }
 
-        // Build AppointmentService rows and persist priceAtBooking
         List<com.example.backend.entity.AppointmentService> appointmentServices = services.stream()
                 .map(svc -> {
                     var as = new com.example.backend.entity.AppointmentService();
@@ -128,7 +110,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return AppointmentMapper.buildFromServices(savedAppt, patient, slot, services, total,
                 request.notes());
     }
-    
+
     @Override
     @Transactional
     public AppointmentCreateResponse confirm(Long appointmentId) {
@@ -172,7 +154,6 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BusinessException("error.appointment.slot.missing");
         }
 
-        // policy: không cho hủy sau giờ bắt đầu
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException("error.appointment.cannot.reject.after.start");
         }
@@ -180,7 +161,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         appt.setStatus(AppointmentStatus.REJECTED);
         var saved = appointmentRepository.save(appt);
 
-        // free slot (CAS)
         appointmentSlotRepository.freeSlotByAppointmentId(saved.getId());
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
@@ -188,13 +168,41 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
+    public Page<AppointmentSummaryResponse> getMyAppointments(AppointmentFilterRequest filters,
+                                                              Pageable pageable) {
+        String currentUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(currentUserEmail).orElseThrow(() -> {
+            String message = messageSource.getMessage("error.unauthorized", null, new Locale("vi"));
+            return new RuntimeException(message);
+        });
+
+        Specification<Appointment> spec = isPatient(currentUser);
+
+        if (StringUtils.hasText(filters.getStatus())) {
+            spec = spec.and(hasStatus(filters.getStatus()));
+        }
+        if (filters.getStartDate() != null) {
+            spec = spec.and(isAfter(filters.getStartDate()));
+        }
+        if (filters.getEndDate() != null) {
+            spec = spec.and(isBefore(filters.getEndDate()));
+        }
+        if (filters.getDoctorId() != null) {
+            spec = spec.and(hasDoctor(filters.getDoctorId()));
+        }
+
+        Page<Appointment> appointments = appointmentRepository.findAll(spec, pageable);
+
+        return appointments.map(appointmentMapper::toAppointmentSummaryResponse);
+    }
+
+    @Override
     @Transactional(readOnly = true)
-    public PageResponse<AppointmentSummaryDto> listMyAppointments(AppointmentListRequest request) {
+    public PageResponse<AppointmentSummaryDto> listDoctorAppointments(AppointmentListRequest request) {
         String email = SecurityUtils.getCurrentUserEmailOrThrow();
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new com.example.backend.exception.UnauthorizedException(
-                        "error.user.not.found"));
+                .orElseThrow(() -> new UnauthorizedException("error.user.not.found"));
         if (currentUser.getDoctor() == null) {
             throw new AccessDeniedException("error.access.denied");
         }
@@ -207,15 +215,38 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<AppointmentSummaryDto> summaries = page.getContent().stream().map(a -> {
             AppointmentSlot s = a.getAppointmentSlot();
             Patient p = a.getPatient();
+            User patientUser = p != null ? p.getUser() : null;
             return new AppointmentSummaryDto(a.getId(), s != null ? s.getStartTime() : null,
                     s != null ? s.getEndTime() : null,
                     a.getStatus() != null ? a.getStatus().name() : null,
                     p != null ? p.getId() : null,
-                    p != null && p.getUser() != null ? p.getUser().getFullName() : null);
+                    patientUser != null ? patientUser.getFullName() : null);
         }).toList();
 
-        Page<AppointmentSummaryDto> dtoPage = new PageImpl<>(summaries, pageable,
-                page.getTotalElements());
+        Page<AppointmentSummaryDto> dtoPage = new PageImpl<>(summaries, pageable, page.getTotalElements());
         return PageResponse.of(dtoPage);
+    }
+
+    private Specification<Appointment> isPatient(User user) {
+        return (root, query, cb) -> cb.equal(root.get("patient").get("user"), user);
+    }
+
+    private Specification<Appointment> hasStatus(String status) {
+        return (root, query, cb) -> cb.equal(root.get("status"), AppointmentStatus.valueOf(status.trim().toUpperCase()));
+    }
+
+    private Specification<Appointment> isAfter(LocalDate startDate) {
+        return (root, query, cb) -> cb.greaterThanOrEqualTo(
+                root.get("appointmentSlot").get("startTime").as(LocalDate.class), startDate);
+    }
+
+    private Specification<Appointment> isBefore(LocalDate endDate) {
+        return (root, query, cb) -> cb.lessThanOrEqualTo(
+                root.get("appointmentSlot").get("startTime").as(LocalDate.class), endDate);
+    }
+
+    private Specification<Appointment> hasDoctor(Long doctorId) {
+        return (root, query, cb) -> cb.equal(root.get("appointmentSlot").get("doctor").get("id"),
+                doctorId);
     }
 }

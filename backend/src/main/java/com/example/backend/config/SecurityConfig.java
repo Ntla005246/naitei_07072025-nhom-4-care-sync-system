@@ -39,14 +39,15 @@ public class SecurityConfig {
             "/api/v1/auth/verify-email",
             ApiConstants.USERS_ENDPOINT + "/profile"};
 
-    private static final String[] PUBLIC_GET_ENDPOINTS = {
-            ApiConstants.SPECIALTIES_ENDPOINT + "/**"};
+    private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.SPECIALTIES_ENDPOINT + "/**",
+            ApiConstants.DOCTORS_ENDPOINT + "/**"};
 
     private static final String[] PATIENT_ENDPOINTS = {
-            ApiConstants.PATIENT_APPOINTMENTS_ENDPOINT + "/**", "/payments/**", "/notifications/**",
+            ApiConstants.APPOINTMENTS_ENDPOINT + "/**", "/payments/**", "/notifications/**",
             "/feedback/**"};
 
     private static final String[] DOCTOR_ENDPOINTS = {
+            ApiConstants.DOCTORS_ENDPOINT + "/me/**",
             ApiConstants.DOCTOR_APPOINTMENTS_ENDPOINT + "/**",
             ApiConstants.DOCTOR_TIME_OFF_ENDPOINT + "/**"};
 
@@ -88,9 +89,7 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authz -> authz.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
-                        .requestMatchers(PATIENT_ENDPOINTS).permitAll()
-                        // ensure me endpoints hit controller so @PreAuthorize can format response
-                        .requestMatchers(ApiConstants.DOCTORS_ENDPOINT + "/me/**").authenticated()
+                        .requestMatchers(PATIENT_ENDPOINTS).hasRole("PATIENT")
                         .requestMatchers(DOCTOR_ENDPOINTS).hasRole("DOCTOR")
                         .requestMatchers(ADMIN_ENDPOINTS).hasRole("ADMIN").anyRequest()
                         .authenticated());
