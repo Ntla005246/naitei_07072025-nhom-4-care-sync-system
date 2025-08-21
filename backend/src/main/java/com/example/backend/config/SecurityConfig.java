@@ -36,7 +36,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {ApiConstants.AUTH_ENDPOINT + "/**",
             "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**",
-            "/api/v1/auth/verify-email"};
+            "/api/v1/auth/verify-email",
+            ApiConstants.USERS_ENDPOINT + "/profile"};
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             ApiConstants.SPECIALTIES_ENDPOINT + "/**"};
