@@ -20,6 +20,9 @@ import com.example.backend.entity.AppointmentSlot;
 import com.example.backend.entity.Patient;
 import com.example.backend.entity.User;
 import com.example.backend.entity.Doctor;
+import com.example.backend.constant.enums.AppointmentStatus;
+import com.example.backend.dto.*;
+import com.example.backend.entity.*;
 import com.example.backend.entity.ids.AppointmentServiceId;
 import com.example.backend.event.AppointmentConfirmedEvent;
 import com.example.backend.event.AppointmentCreatedEvent;
@@ -29,12 +32,22 @@ import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.AppointmentMapper;
+import com.example.backend.repository.*;
+import com.example.backend.exception.UnauthorizedException;
+import com.example.backend.mapper.AppointmentMapper;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.AppointmentSlotRepository;
 import com.example.backend.repository.AppointmentServiceRepository;
 import com.example.backend.repository.ServiceRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppointmentService;
+import com.example.backend.util.SecurityUtils;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import com.example.backend.service.CalendarSyncService;
 import com.example.backend.util.SecurityUtils;
 
@@ -47,6 +60,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -56,6 +70,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.example.backend.dto.AppointmentListRequest;
 import com.example.backend.dto.AppointmentSummaryDto;
@@ -106,6 +124,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException("error.appointment.slot.unavailable");
         }
+
+        Patient patient = patientRepository.findById(request.patientId())
+                .orElseThrow(() -> new ResourceNotFoundException("error.patient.not.found",
+                        request.patientId()));
 
         List<com.example.backend.entity.Service> services = serviceRepository
                 .findAllById(request.serviceIds());
@@ -200,7 +222,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             BigDecimal totalAmount = apptServices.stream()
                     .map(com.example.backend.entity.AppointmentService::getPriceAtBooking)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            
+
             invoiceService.createInvoiceForAppointment(saved.getId(), totalAmount);
             log.info("Auto-created invoice for confirmed appointment: {}", saved.getId());
         } catch (Exception e) {
@@ -212,7 +234,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         calendarSyncService.syncAppointmentToCalendar(saved);
 
         // TODO: publish AppointmentConfirmedEvent here (Patient Notifications task)
-        
+
         // Notification out of current scope: do not publish confirmed event
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
