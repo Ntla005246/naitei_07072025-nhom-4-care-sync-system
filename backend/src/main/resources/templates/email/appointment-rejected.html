@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Appointment Rejected</title>
+</head>
+<body>
+    <p th:text="#{email.greeting(${patientName})}">Hello
+        [[${patientName}]],</p>
+    <p
+        th:text="#{email.appointment.rejected(${doctorName}, ${#temporals.format(startTime, 'yyyy-MM-dd HH:mm')}, ${reason})}">Your
+        appointment is rejected.</p>
+</body>
+</html>

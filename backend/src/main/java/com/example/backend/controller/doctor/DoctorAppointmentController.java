@@ -27,7 +27,8 @@ public class DoctorAppointmentController {
     public ApiResponse<PageResponse<AppointmentSummaryDto>> listMyAppointments(
             @Valid @ModelAttribute AppointmentListRequest request) {
         log.info("Listing my appointments: {}", request);
-        PageResponse<AppointmentSummaryDto> result = appointmentService.listMyAppointments(request);
+        PageResponse<AppointmentSummaryDto> result = appointmentService
+                .listDoctorAppointments(request);
         String message = messageSource.getMessage("success.operation", null,
                 LocaleContextHolder.getLocale());
         return ApiResponse.success(result, message);

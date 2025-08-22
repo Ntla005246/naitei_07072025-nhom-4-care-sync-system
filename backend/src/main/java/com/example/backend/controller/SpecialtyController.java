@@ -49,7 +49,7 @@ public class SpecialtyController {
 
         return ApiResponse.success(result, message);
     }
-    
+
     @GetMapping("/{specialtyId}/doctors")
     @Operation(summary = "Get doctors by specialty", description = "Retrieve doctors filtered by specialty ID")
     public ApiResponse<List<DoctorDto>> getDoctorsBySpecialty(@PathVariable Long specialtyId) {

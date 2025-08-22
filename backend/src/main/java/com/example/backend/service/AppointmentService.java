@@ -15,6 +15,7 @@ public interface AppointmentService {
     AppointmentCreateResponse create(AppointmentCreateRequest request);
     AppointmentCreateResponse confirm(Long appointmentId);
     AppointmentCreateResponse reject(Long appointmentId, AppointmentRejectRequest request);
-    Page<AppointmentSummaryResponse> getMyAppointments(AppointmentFilterRequest filters, Pageable pageable);
+    Page<AppointmentSummaryResponse> getMyAppointments(AppointmentFilterRequest filters,
+            Pageable pageable);
     PageResponse<AppointmentSummaryDto> listDoctorAppointments(AppointmentListRequest request);
 }

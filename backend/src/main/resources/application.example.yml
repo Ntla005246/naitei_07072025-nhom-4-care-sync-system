@@ -1,18 +1,17 @@
 server:
   port: 8080
-  servlet:
 
 spring:
   application:
     name: backend
   datasource:
     url: jdbc:mysql://localhost:3306/health_booking_dev?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
+    username: username
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -23,18 +22,20 @@ spring:
     port: 587
     username: ${MAIL_USERNAME:your-email@gmail.com}
     password: ${MAIL_PASSWORD:your-app-password}
+    default-encoding: UTF-8
     properties:
       mail:
+        debug: true
         smtp:
           auth: true
           starttls:
             enable: true
-
-# JWT Configuration
-jwt:
-  secret: ${JWT_SECRET:mySecretKey}
-  expiration: 86400000 # 24 hours
-  refresh-expiration: 604800000 # 7 days
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    clean-disabled: false
+    validate-on-migrate: false
 
 # Logging
 logging:
@@ -62,8 +63,23 @@ springdoc:
     path: /swagger-ui.html
     operationsSorter: method
 
-flyway:
-  enabled: true
-  locations: classpath:db/migration
-  baseline-on-migrate: true
-  clean-disabled: false
+jwt:
+  secret: ${JWT_SECRET:default_super_secret_key_for_development_environment}
+  expiration: 86400000 # 24 hours
+  refresh-expiration: 604800000 # 7 days
+
+app:
+  upload:
+    dir: "uploads/"
+    max-size: 10485760 # 10 MB
+  swagger:
+    title: Care Sync System API
+    description: API documentation for the Care Sync System, providing endpoints for managing appointments, patients, and doctors.
+    version: "1.0.0"
+    contact-name: "Care Sync Support"
+    contact-email: "support@caresync.com"
+    contact-url: "https://your-support-page.com"
+  timezone: Asia/Ho_Chi_Minh
+  mail:
+    fromEmail: ${MAIL_FROM:no-reply@example.com}
+    fromName: ${MAIL_FROM_NAME:CareSync}

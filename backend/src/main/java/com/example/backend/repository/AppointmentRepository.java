@@ -12,8 +12,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
-        JpaSpecificationExecutor<Appointment> {
+public interface AppointmentRepository
+        extends
+            JpaRepository<Appointment, Long>,
+            JpaSpecificationExecutor<Appointment> {
 
     @Query("""
             SELECT a FROM Appointment a
@@ -25,6 +27,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long>,
             ORDER BY s.startTime DESC
             """)
     Page<Appointment> findByDoctorWithFilters(@Param("doctorId") Long doctorId,
-                                              @Param("status") AppointmentStatus status, @Param("startFrom") LocalDateTime startFrom,
-                                              @Param("startTo") LocalDateTime startTo, Pageable pageable);
+            @Param("status") AppointmentStatus status, @Param("startFrom") LocalDateTime startFrom,
+            @Param("startTo") LocalDateTime startTo, Pageable pageable);
 }

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Appointment Reminder</title>
+</head>
+<body>
+    <p th:text="#{email.greeting(${patientName})}">Hello
+        [[${patientName}]],</p>
+    <p
+        th:text="#{email.appointment.reminder(${doctorName}, ${#temporals.format(startTime, 'yyyy-MM-dd HH:mm')})}">Reminder.</p>
+</body>
+</html>

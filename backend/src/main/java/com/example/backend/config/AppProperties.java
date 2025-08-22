@@ -14,6 +14,9 @@ public class AppProperties {
     private final Jwt jwt = new Jwt();
     private final Upload upload = new Upload();
     private final Swagger swagger = new Swagger();
+    private final Mail mail = new Mail();
+
+    private String timezone;
 
     @Getter
     @Setter
@@ -39,5 +42,12 @@ public class AppProperties {
         private String contactName;
         private String contactEmail;
         private String contactUrl;
+    }
+
+    @Getter
+    @Setter
+    public static class Mail {
+        private String fromEmail;
+        private String fromName;
     }
 }

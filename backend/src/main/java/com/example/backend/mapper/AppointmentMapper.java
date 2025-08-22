@@ -25,8 +25,8 @@ public interface AppointmentMapper {
     AppointmentSummaryResponse toAppointmentSummaryResponse(Appointment appointment);
 
     static AppointmentCreateResponse buildFromServices(Appointment savedAppt, Patient patient,
-                                                       AppointmentSlot slot, List<com.example.backend.entity.Service> services,
-                                                       BigDecimal total, String notes) {
+            AppointmentSlot slot, List<com.example.backend.entity.Service> services,
+            BigDecimal total, String notes) {
         Doctor doctor = slot.getDoctor();
         Specialty specialty = doctor.getSpecialty();
         User user = doctor.getUser();
@@ -34,18 +34,18 @@ public interface AppointmentMapper {
                 new SlotInfo(slot.getStartTime(), slot.getEndTime(), doctor.getId()),
                 new DoctorInfo(doctor.getId(),
                         Optional.ofNullable(user).map(User::getFullName).orElse(null),
-                        Optional.ofNullable(specialty).map(s -> s.getId().longValue())
-                                .orElse(null),
+                        Optional.ofNullable(specialty).map(s -> s.getId().longValue()).orElse(null),
                         Optional.ofNullable(specialty).map(Specialty::getName).orElse(null)),
-                savedAppt.getStatus().name(), services.stream()
-                .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
-                .toList(),
+                savedAppt.getStatus().name(),
+                services.stream()
+                        .map(svc -> new ServiceItem(svc.getId(), svc.getName(), svc.getPrice()))
+                        .toList(),
                 total, notes);
     }
 
     static AppointmentCreateResponse buildFromAppointmentServices(Appointment appt,
-                                                                  AppointmentSlot slot,
-                                                                  List<com.example.backend.entity.AppointmentService> apptServices) {
+            AppointmentSlot slot,
+            List<com.example.backend.entity.AppointmentService> apptServices) {
         Doctor doctor = slot.getDoctor();
         Specialty specialty = doctor.getSpecialty();
         User user = doctor.getUser();
@@ -56,13 +56,13 @@ public interface AppointmentMapper {
                 new SlotInfo(slot.getStartTime(), slot.getEndTime(), doctor.getId()),
                 new DoctorInfo(doctor.getId(),
                         Optional.ofNullable(user).map(User::getFullName).orElse(null),
-                        Optional.ofNullable(specialty).map(s -> s.getId().longValue())
-                                .orElse(null),
+                        Optional.ofNullable(specialty).map(s -> s.getId().longValue()).orElse(null),
                         Optional.ofNullable(specialty).map(Specialty::getName).orElse(null)),
-                appt.getStatus().name(), apptServices.stream()
-                .map(as -> new ServiceItem(as.getService().getId(),
-                        as.getService().getName(), as.getPriceAtBooking()))
-                .toList(),
+                appt.getStatus().name(),
+                apptServices.stream()
+                        .map(as -> new ServiceItem(as.getService().getId(),
+                                as.getService().getName(), as.getPriceAtBooking()))
+                        .toList(),
                 total, appt.getNotes());
     }
 }

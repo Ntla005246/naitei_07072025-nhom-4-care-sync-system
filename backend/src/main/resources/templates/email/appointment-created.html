@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Appointment Created</title>
+</head>
+<body>
+    <p th:text="#{email.greeting(${patientName})}">Hello
+        [[${patientName}]],</p>
+    <p
+        th:text="#{email.appointment.created(${doctorName}, ${#temporals.format(startTime, 'yyyy-MM-dd HH:mm')})}">Your
+        appointment is created.</p>
+</body>
+</html>

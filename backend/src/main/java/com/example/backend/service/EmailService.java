@@ -2,7 +2,6 @@ package com.example.backend.service;
 
 import com.example.backend.constant.ApiConstants;
 import com.example.backend.constant.MessageConstants;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,6 +17,8 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
+    private final com.example.backend.config.AppProperties appProperties;
+
     @Async
     public void sendVerificationEmail(String recipientEmail, String userName, String token) {
         try {
@@ -32,11 +33,32 @@ public class EmailService {
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            helper.setFrom(appProperties.getMail().getFromEmail(),
+                    appProperties.getMail().getFromName());
             helper.setTo(recipientEmail);
             helper.setSubject(MessageConstants.EMAIL_SUBJECT_EMAIL_VERIFICATION);
             helper.setText(htmlContent, true);
             mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
+            throw new RuntimeException(MessageConstants.EMAIL_SENDING_FAILED, e);
+        }
+    }
+
+    @Async
+    @org.springframework.retry.annotation.Retryable(maxAttempts = 3, backoff = @org.springframework.retry.annotation.Backoff(delay = 2000, multiplier = 2.5))
+    public void sendHtmlEmail(String recipientEmail, String subject, String templateName,
+            Context context) {
+        try {
+            String htmlContent = templateEngine.process(templateName, context);
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            helper.setFrom(appProperties.getMail().getFromEmail(),
+                    appProperties.getMail().getFromName());
+            helper.setTo(recipientEmail);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            mailSender.send(mimeMessage);
+        } catch (Exception e) {
             throw new RuntimeException(MessageConstants.EMAIL_SENDING_FAILED, e);
         }
     }

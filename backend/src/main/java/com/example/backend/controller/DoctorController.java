@@ -40,12 +40,13 @@ public class DoctorController {
         return ApiResponse.success(doctors, message);
     }
 
-	@GetMapping("/search")
-	@Operation(summary = "Search doctors with pagination", description = "Search and filter doctors with pagination support")
-	public ApiResponse<PageResponse<DoctorDto>> searchDoctors(@ModelAttribute DoctorSearchRequest request) {
-		PageResponse<DoctorDto> result = doctorService.searchDoctors(request);
-		String message = messageSource.getMessage("success.operation", null,
-				LocaleContextHolder.getLocale());
-		return ApiResponse.success(result, message);
-	}
+    @GetMapping("/search")
+    @Operation(summary = "Search doctors with pagination", description = "Search and filter doctors with pagination support")
+    public ApiResponse<PageResponse<DoctorDto>> searchDoctors(
+            @ModelAttribute DoctorSearchRequest request) {
+        PageResponse<DoctorDto> result = doctorService.searchDoctors(request);
+        String message = messageSource.getMessage("success.operation", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(result, message);
+    }
 }

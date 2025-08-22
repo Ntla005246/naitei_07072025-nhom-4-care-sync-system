@@ -31,8 +31,7 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<UserProfileDto>> getCurrentUser() {
         UserProfileDto userProfileDto = userService.getCurrentUser();
-        return ResponseEntity.ok(ApiResponse.success(userProfileDto,
-                messageSource.getMessage("success.user.profile.retrieved", null,
-                        LocaleContextHolder.getLocale())));
+        return ResponseEntity.ok(ApiResponse.success(userProfileDto, messageSource.getMessage(
+                "success.user.profile.retrieved", null, LocaleContextHolder.getLocale())));
     }
-} 
+}

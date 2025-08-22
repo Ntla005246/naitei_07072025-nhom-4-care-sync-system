@@ -44,17 +44,15 @@ public class UserServiceImpl implements UserService {
             if (!jwtTokenProvider.validateToken(token)) {
                 throw new UnauthorizedException("error.unauthorized");
             }
-            candidateEmail = jwtTokenProvider.getUsernameFromToken(token);
+            candidateEmail = jwtTokenProvider.getEmailFromToken(token);
         }
 
         final String lookupEmail = candidateEmail;
 
-        User user = userRepository.findByEmail(lookupEmail)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "error.user.not.found.by.email", lookupEmail));
-        return UserMapper.toUserProfileDto(user)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "error.user.not.found.by.email", lookupEmail));
+        User user = userRepository.findByEmail(lookupEmail).orElseThrow(
+                () -> new ResourceNotFoundException("error.user.not.found.by.email", lookupEmail));
+        return UserMapper.toUserProfileDto(user).orElseThrow(
+                () -> new ResourceNotFoundException("error.user.not.found.by.email", lookupEmail));
     }
 
-} 
+}
