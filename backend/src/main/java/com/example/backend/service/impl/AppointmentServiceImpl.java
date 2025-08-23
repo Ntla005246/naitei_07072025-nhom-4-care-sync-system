@@ -2,6 +2,7 @@ package com.example.backend.service.impl;
 
 import com.example.backend.constant.enums.AppointmentStatus;
 import com.example.backend.dto.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Objects;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.example.backend.dto.AppointmentCreateRequest;
 import com.example.backend.dto.AppointmentCreateResponse;
 import com.example.backend.dto.AppointmentCancelResponse;
@@ -30,13 +32,17 @@ import com.example.backend.mapper.AppointmentMapper;
 import com.example.backend.repository.*;
 import com.example.backend.service.AppointmentService;
 import com.example.backend.util.SecurityUtils;
+
 import java.time.LocalDate;
 import java.util.Locale;
+
 import com.example.backend.dto.AppointmentRejectRequest;
+
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -45,11 +51,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
+
 import com.example.backend.dto.AppointmentListRequest;
 import com.example.backend.dto.AppointmentSummaryDto;
 import com.example.backend.dto.PageResponse;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
+
+import com.example.backend.service.InvoiceService;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +75,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentMapper appointmentMapper;
     private final MessageSource messageSource;
     private final ApplicationEventPublisher eventPublisher;
+    private final InvoiceService invoiceService;
 
     @Override
     @Transactional
@@ -156,7 +167,19 @@ public class AppointmentServiceImpl implements AppointmentService {
         appt.setStatus(AppointmentStatus.CONFIRMED);
         var saved = appointmentRepository.save(appt);
 
-        // Notification out of current scope: do not publish confirmed event
+        // Tự động tạo invoice khi confirm appointment
+        try {
+            var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
+            BigDecimal totalAmount = apptServices.stream()
+                    .map(com.example.backend.entity.AppointmentService::getPriceAtBooking)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            invoiceService.createInvoiceForAppointment(saved.getId(), totalAmount);
+            log.info("Auto-created invoice for confirmed appointment: {}", saved.getId());
+        } catch (Exception e) {
+            log.error("Failed to create invoice for appointment: {}", saved.getId(), e);
+            // Không throw exception để không ảnh hưởng đến việc confirm appointment
+        }
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
@@ -188,7 +211,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentSlotRepository.freeSlotByAppointmentId(saved.getId());
 
-        // Notification out of current scope: do not publish rejected event
+        // TODO: Implement invoice cancellation logic if needed
+        log.info("Appointment rejected: {}", saved.getId());
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);

@@ -23,9 +23,6 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 @Slf4j
 @RequiredArgsConstructor
@@ -74,6 +71,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleUserAlreadyExistsException(
             UserAlreadyExistsException ex) {
         log.warn("User already exists exception: Code - {}", ex.getErrorCode());
+        String localizedMessage = getMessage(ex.getErrorCode(), ex.getArgs());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(
+                toExternalCode(ex.getErrorCode()), localizedMessage, HttpStatus.CONFLICT.value()));
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException ex) {
+        log.warn("Resource already exists exception: Code - {}", ex.getErrorCode());
         String localizedMessage = getMessage(ex.getErrorCode(), ex.getArgs());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(
                 toExternalCode(ex.getErrorCode()), localizedMessage, HttpStatus.CONFLICT.value()));

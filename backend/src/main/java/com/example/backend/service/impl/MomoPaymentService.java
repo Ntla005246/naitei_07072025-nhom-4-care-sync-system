@@ -2,6 +2,7 @@ package com.example.backend.service.impl;
 
 import java.util.UUID;
 
+import com.example.backend.repository.InvoiceRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
