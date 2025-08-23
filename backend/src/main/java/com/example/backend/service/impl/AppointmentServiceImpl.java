@@ -33,8 +33,6 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.AppointmentMapper;
 import com.example.backend.repository.*;
-import com.example.backend.exception.UnauthorizedException;
-import com.example.backend.mapper.AppointmentMapper;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.AppointmentSlotRepository;
 import com.example.backend.repository.AppointmentServiceRepository;
@@ -42,17 +40,9 @@ import com.example.backend.repository.ServiceRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppointmentService;
 import com.example.backend.util.SecurityUtils;
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import com.example.backend.service.CalendarSyncService;
-import com.example.backend.util.SecurityUtils;
-
-import java.time.LocalDate;
-import java.util.Locale;
 
 import com.example.backend.dto.AppointmentRejectRequest;
 
@@ -60,10 +50,10 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.context.MessageSource;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -71,16 +61,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
 
 import com.example.backend.dto.AppointmentListRequest;
 import com.example.backend.dto.AppointmentSummaryDto;
 import com.example.backend.dto.PageResponse;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 
 import com.example.backend.service.InvoiceService;
 
