@@ -4,13 +4,15 @@ import com.example.backend.constant.enums.NotificationStatus;
 import com.example.backend.constant.enums.NotificationType;
 import com.example.backend.entity.Notification;
 import com.example.backend.entity.User;
-import com.example.backend.event.*;
+import com.example.backend.event.AppointmentCreatedEvent;
+import com.example.backend.event.DoctorNewAppointmentRequestEvent;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.NotificationService;
 import com.example.backend.service.EmailService;
 import com.example.backend.util.NotificationValidationUtil;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
@@ -48,43 +50,77 @@ public class NotificationServiceImpl implements NotificationService {
         map.put(AppointmentCreatedEvent.class,
                 new HandlerConfig(NotificationType.APPOINTMENT_CREATED,
                         "notification.appointment.created", "email.subject.appointment.created",
-                        "email/appointment-created",
+                        "email/patient/appointment-created",
                         e -> new Object[]{((AppointmentCreatedEvent) e).appointmentId()},
-                        e -> ((AppointmentCreatedEvent) e).patientEmail(),
-                        e -> Map.of("patientName", ((AppointmentCreatedEvent) e).patientName(),
-                                "doctorName", ((AppointmentCreatedEvent) e).doctorName(),
-                                "startTime", ((AppointmentCreatedEvent) e).startTime())));
+                        e -> ((AppointmentCreatedEvent) e).patientEmail(), e -> {
+                            Map<String, Object> vars = new HashMap<>();
+                            vars.put("patientName", ((AppointmentCreatedEvent) e).patientName());
+                            vars.put("doctorName", ((AppointmentCreatedEvent) e).doctorName());
+                            vars.put("specialtyName",
+                                    ((AppointmentCreatedEvent) e).specialtyName());
+                            vars.put("startTime", ((AppointmentCreatedEvent) e).startTime());
+                            vars.put("endTime", ((AppointmentCreatedEvent) e).endTime());
+                            vars.put("totalPrice", ((AppointmentCreatedEvent) e).totalPrice());
+                            vars.put("appointmentId",
+                                    ((AppointmentCreatedEvent) e).appointmentId());
+                            // URLs
+                            vars.put("appointmentDetailUrl",
+                                    com.example.backend.constant.EmailConstants
+                                            .appointmentDetailUrl(
+                                                    ((AppointmentCreatedEvent) e).appointmentId()));
+                            return vars;
+                        }));
 
-        map.put(AppointmentConfirmedEvent.class,
-                new HandlerConfig(NotificationType.APPOINTMENT_CONFIRMED,
-                        "notification.appointment.confirmed", "email.subject.appointment.confirmed",
-                        "email/appointment-confirmed",
-                        e -> new Object[]{((AppointmentConfirmedEvent) e).appointmentId()},
-                        e -> ((AppointmentConfirmedEvent) e).patientEmail(),
-                        e -> Map.of("patientName", ((AppointmentConfirmedEvent) e).patientName(),
-                                "doctorName", ((AppointmentConfirmedEvent) e).doctorName(),
-                                "startTime", ((AppointmentConfirmedEvent) e).startTime())));
-
-        map.put(AppointmentRejectedEvent.class,
-                new HandlerConfig(NotificationType.APPOINTMENT_REJECTED,
-                        "notification.appointment.rejected", "email.subject.appointment.rejected",
-                        "email/appointment-rejected",
-                        e -> new Object[]{((AppointmentRejectedEvent) e).appointmentId()},
-                        e -> ((AppointmentRejectedEvent) e).patientEmail(),
-                        e -> Map.of("patientName", ((AppointmentRejectedEvent) e).patientName(),
-                                "doctorName", ((AppointmentRejectedEvent) e).doctorName(),
-                                "startTime", ((AppointmentRejectedEvent) e).startTime(), "reason",
-                                ((AppointmentRejectedEvent) e).reason())));
-
-        map.put(AppointmentReminderEvent.class,
-                new HandlerConfig(NotificationType.APPOINTMENT_REMINDER,
-                        "notification.appointment.reminder", "email.subject.appointment.reminder",
-                        "email/appointment-reminder",
-                        e -> new Object[]{((AppointmentReminderEvent) e).appointmentId()},
-                        e -> ((AppointmentReminderEvent) e).patientEmail(),
-                        e -> Map.of("patientName", ((AppointmentReminderEvent) e).patientName(),
-                                "doctorName", ((AppointmentReminderEvent) e).doctorName(),
-                                "startTime", ((AppointmentReminderEvent) e).startTime())));
+        map.put(DoctorNewAppointmentRequestEvent.class,
+                new HandlerConfig(NotificationType.DOCTOR_NEW_APPOINTMENT_REQUEST,
+                        "notification.doctor.new.appointment.request",
+                        "email.subject.doctor.new.appointment.request",
+                        "email/doctor/new-appointment-request",
+                        e -> new Object[]{((DoctorNewAppointmentRequestEvent) e).appointmentId()},
+                        e -> ((DoctorNewAppointmentRequestEvent) e).doctorEmail(), e -> {
+                            Map<String, Object> vars = new HashMap<>();
+                            vars.put("doctorName",
+                                    ((DoctorNewAppointmentRequestEvent) e).doctorName());
+                            vars.put("patientName",
+                                    ((DoctorNewAppointmentRequestEvent) e).patientName());
+                            vars.put("patientEmail",
+                                    ((DoctorNewAppointmentRequestEvent) e).patientEmail());
+                            vars.put("patientPhone",
+                                    ((DoctorNewAppointmentRequestEvent) e).patientPhone());
+                            vars.put("specialtyName",
+                                    ((DoctorNewAppointmentRequestEvent) e).specialtyName());
+                            vars.put("serviceNames",
+                                    ((DoctorNewAppointmentRequestEvent) e).serviceNames());
+                            vars.put("totalPrice",
+                                    ((DoctorNewAppointmentRequestEvent) e).totalPrice());
+                            vars.put("patientNotes",
+                                    ((DoctorNewAppointmentRequestEvent) e).patientNotes());
+                            vars.put("appointmentCreatedAt",
+                                    ((DoctorNewAppointmentRequestEvent) e).appointmentCreatedAt());
+                            vars.put("appointmentStartTime",
+                                    ((DoctorNewAppointmentRequestEvent) e).appointmentStartTime());
+                            vars.put("appointmentEndTime",
+                                    ((DoctorNewAppointmentRequestEvent) e).appointmentEndTime());
+                            vars.put("appointmentId",
+                                    ((DoctorNewAppointmentRequestEvent) e).appointmentId());
+                            // URLs
+                            vars.put("appointmentDetailUrl",
+                                    com.example.backend.constant.EmailConstants
+                                            .doctorAppointmentDetailUrl(
+                                                    ((DoctorNewAppointmentRequestEvent) e)
+                                                            .appointmentId()));
+                            vars.put("confirmAppointmentUrl",
+                                    com.example.backend.constant.EmailConstants
+                                            .doctorConfirmAppointmentUrl(
+                                                    ((DoctorNewAppointmentRequestEvent) e)
+                                                            .appointmentId()));
+                            vars.put("rejectAppointmentUrl",
+                                    com.example.backend.constant.EmailConstants
+                                            .doctorRejectAppointmentUrl(
+                                                    ((DoctorNewAppointmentRequestEvent) e)
+                                                            .appointmentId()));
+                            return vars;
+                        }));
 
         return map;
     }

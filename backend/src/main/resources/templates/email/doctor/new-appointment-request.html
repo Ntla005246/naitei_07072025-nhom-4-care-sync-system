@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yêu cầu lịch hẹn mới</title>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: #333;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.logo {
+    color: #2e7d32;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 16px;
+}
+
+.greeting {
+    font-size: 18px;
+    color: #2e7d32;
+    margin-bottom: 25px;
+}
+
+.appointment-info {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid #2e7d32;
+}
+
+.patient-info {
+    background-color: #e8f5e8;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid #4caf50;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.label {
+    font-weight: 600;
+    color: #495057;
+    min-width: 140px;
+}
+
+.value {
+    color: #212529;
+    text-align: right;
+    flex: 1;
+}
+
+.status-badge {
+    background-color: #fff3cd;
+    color: #856404;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.services-list {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 10px 0;
+}
+
+.service-item {
+    background-color: #e3f2fd;
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border-left: 3px solid #1976d2;
+}
+
+.notes-section {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #2e7d32;
+    color: white;
+    padding: 12px 24px;
+    text-decoration: none;
+    border-radius: 6px;
+    margin: 10px 5px;
+    font-weight: 600;
+}
+
+.btn:hover {
+    background-color: #1b5e20;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #545b62;
+}
+
+.urgent {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏥 Care Sync</div>
+            <div class="subtitle">Hệ thống quản lý lịch hẹn y tế</div>
+        </div>
+
+        <div class="greeting">
+            Xin chào <strong th:text="${doctorName}">Bác sĩ</strong>!
+            👨‍⚕️
+        </div>
+
+        <p>Bạn có một yêu cầu lịch hẹn mới cần xem xét và xác nhận.</p>
+
+        <div class="patient-info">
+            <h3 style="color: #2e7d32; margin-top: 0;">👤 Thông tin
+                bệnh nhân</h3>
+
+            <div class="info-row">
+                <span class="label">Họ tên:</span> <span class="value"
+                    th:text="${patientName}">Nguyễn Văn B</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Email:</span> <span class="value"
+                    th:text="${patientEmail}">patient@example.com</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Số điện thoại:</span> <span
+                    class="value" th:text="${patientPhone}">0123456789</span>
+            </div>
+        </div>
+
+        <div class="appointment-info">
+            <h3 style="color: #2e7d32; margin-top: 0;">📋 Chi tiết
+                lịch hẹn</h3>
+
+            <div class="info-row">
+                <span class="label">Mã lịch hẹn:</span> <span
+                    class="value" th:text="${appointmentId}">#12345</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Khoa:</span> <span class="value"
+                    th:text="${specialtyName}">Tim mạch</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Thời gian khám:</span> <span
+                    class="value"> <span
+                    th:text="${#temporals.format(appointmentStartTime, 'HH:mm')}">09:00</span>
+                    - <span
+                    th:text="${#temporals.format(appointmentEndTime, 'HH:mm')}">10:00</span>
+                    <br> <span
+                    th:text="${#temporals.format(appointmentStartTime, 'EEEE, dd/MM/yyyy')}">Thứ
+                        Hai, 26/09/2025</span>
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Thời gian đặt:</span> <span
+                    class="value"
+                    th:text="${#temporals.format(appointmentCreatedAt, 'HH:mm dd/MM/yyyy')}">14:00
+                    26/09/2025</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Trạng thái:</span> <span
+                    class="value"> <span class="status-badge">⏳
+                        Chờ xác nhận</span>
+                </span>
+            </div>
+
+            <div class="info-row" th:if="${totalPrice != null}">
+                <span class="label">Tổng chi phí:</span> <span
+                    class="value price"
+                    th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">500,000
+                    VNĐ</span>
+            </div>
+        </div>
+
+        <div class="services-list"
+            th:if="${serviceNames != null and !serviceNames.empty}">
+            <h4 style="color: #2e7d32; margin-top: 0;">🔬 Dịch vụ
+                khám</h4>
+            <div class="service-item"
+                th:each="service : ${serviceNames}" th:text="${service}">
+                Khám tim mạch</div>
+        </div>
+
+        <div class="notes-section"
+            th:if="${patientNotes != null and !patientNotes.empty}">
+            <h4 style="color: #856404; margin-top: 0;">📝 Ghi chú
+                của bệnh nhân</h4>
+            <p style="margin: 10px 0; font-style: italic;"
+                th:text="${patientNotes}">Bệnh nhân có triệu chứng
+                đau ngực vài ngày gần đây</p>
+        </div>
+
+        <div class="urgent">
+            <h4 style="margin-top: 0; color: #721c24;">⚡ Hành động
+                cần thiết</h4>
+            <p>Vui lòng xem xét và xác nhận lịch hẹn này trong thời
+                gian sớm nhất để bệnh nhân có thể chuẩn bị.</p>
+        </div>
+
+        <div style="text-align: center; margin: 25px 0;">
+            <a th:href="${confirmAppointmentUrl}" class="btn">✅ Xác
+                nhận lịch hẹn</a> <a th:href="${rejectAppointmentUrl}"
+                class="btn btn-secondary">❌ Từ chối lịch hẹn</a> <a
+                th:href="${appointmentDetailUrl}"
+                class="btn btn-secondary">📱 Xem chi tiết</a>
+        </div>
+
+        <div
+            style="background-color: #e8f5e8; border: 1px solid #c8e6c9; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #2e7d32;">💡 Gợi ý</h4>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                <li>Kiểm tra lịch làm việc của bạn trước khi xác
+                    nhận</li>
+                <li>Nếu cần thay đổi thời gian, hãy liên hệ với
+                    bệnh nhân</li>
+                <li>Xem xét ghi chú của bệnh nhân để chuẩn bị tốt
+                    hơn</li>
+                <li>Bệnh nhân sẽ nhận được thông báo ngay khi bạn
+                    xác nhận</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>
+                Trân trọng,<br> <strong>Đội ngũ Care Sync</strong>
+            </p>
+            <p style="font-size: 12px; color: #adb5bd;">Email này
+                được gửi tự động, vui lòng không trả lời trực tiếp.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -14,8 +14,7 @@ public class NotificationEventListener {
     private final NotificationService notificationService;
 
     @Async
-    @EventListener({AppointmentCreatedEvent.class, AppointmentConfirmedEvent.class,
-            AppointmentRejectedEvent.class, AppointmentReminderEvent.class})
+    @EventListener({AppointmentCreatedEvent.class, DoctorNewAppointmentRequestEvent.class})
     public void onEvent(Object event) {
         notificationService.handle(event);
     }

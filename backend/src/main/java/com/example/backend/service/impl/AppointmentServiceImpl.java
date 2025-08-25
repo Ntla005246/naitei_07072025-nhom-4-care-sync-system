@@ -17,7 +17,12 @@ import com.example.backend.entity.Appointment;
 import com.example.backend.entity.AppointmentSlot;
 import com.example.backend.entity.Patient;
 import com.example.backend.entity.User;
+import com.example.backend.entity.Doctor;
 import com.example.backend.entity.ids.AppointmentServiceId;
+import com.example.backend.event.AppointmentConfirmedEvent;
+import com.example.backend.event.AppointmentCreatedEvent;
+import com.example.backend.event.AppointmentRejectedEvent;
+import com.example.backend.event.DoctorNewAppointmentRequestEvent;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
@@ -28,8 +33,11 @@ import com.example.backend.util.SecurityUtils;
 import java.time.LocalDate;
 import java.util.Locale;
 import com.example.backend.dto.AppointmentRejectRequest;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -56,6 +64,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final AppointmentMapper appointmentMapper;
     private final MessageSource messageSource;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -118,7 +127,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .map(com.example.backend.entity.AppointmentService::getPriceAtBooking)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // TODO: publish AppointmentCreatedEvent here (Patient Notifications task)
+        // Publish events for notifications
+        publishAppointmentCreatedEvents(savedAppt, patient, slot, services, total, request.notes());
 
         return AppointmentMapper.buildFromServices(savedAppt, patient, slot, services, total,
                 request.notes());
@@ -146,7 +156,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appt.setStatus(AppointmentStatus.CONFIRMED);
         var saved = appointmentRepository.save(appt);
 
-        // TODO: publish AppointmentConfirmedEvent here (Patient Notifications task)
+        // Notification out of current scope: do not publish confirmed event
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
@@ -178,7 +188,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentSlotRepository.freeSlotByAppointmentId(saved.getId());
 
-        // TODO: publish AppointmentRejectedEvent here (Patient Notifications task)
+        // Notification out of current scope: do not publish rejected event
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
@@ -330,5 +340,65 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return new AppointmentCancelResponse(appt.getId(), oldStatus, appt.getStatus().name(),
                 slotReleased, policyMsg, false);
+    }
+
+    // Event publishing methods
+    private void publishAppointmentCreatedEvents(Appointment appointment, Patient patient,
+            AppointmentSlot slot, List<com.example.backend.entity.Service> services,
+            BigDecimal totalPrice, String notes) {
+
+        User patientUser = patient.getUser();
+        Doctor doctor = slot.getDoctor();
+        User doctorUser = doctor.getUser();
+
+        // Publish event for patient
+        AppointmentCreatedEvent patientEvent = new AppointmentCreatedEvent(appointment.getId(),
+                patient.getId(), patientUser.getEmail(), patientUser.getFullName(),
+                slot.getStartTime(), slot.getEndTime(), doctor.getId(), doctorUser.getFullName(),
+                doctor.getSpecialty() != null ? doctor.getSpecialty().getName() : null, totalPrice);
+        eventPublisher.publishEvent(patientEvent);
+
+        // Publish event for doctor
+        List<String> serviceNames = services.stream()
+                .map(com.example.backend.entity.Service::getName).collect(Collectors.toList());
+
+        DoctorNewAppointmentRequestEvent doctorEvent = new DoctorNewAppointmentRequestEvent(
+                appointment.getId(), doctor.getId(), doctorUser.getEmail(),
+                doctorUser.getFullName(),
+                doctor.getSpecialty() != null ? doctor.getSpecialty().getName() : null,
+                patient.getId(), patientUser.getFullName(), patientUser.getEmail(),
+                patientUser.getPhoneNumber(), serviceNames, totalPrice, notes,
+                appointment.getCreatedAt(), slot.getStartTime(), slot.getEndTime());
+        eventPublisher.publishEvent(doctorEvent);
+
+        log.info("Published appointment created events for appointment: {}", appointment.getId());
+    }
+
+    private void publishAppointmentConfirmedEvent(Appointment appointment, AppointmentSlot slot) {
+        User patientUser = appointment.getPatient().getUser();
+        Doctor doctor = slot.getDoctor();
+        User doctorUser = doctor.getUser();
+
+        AppointmentConfirmedEvent event = new AppointmentConfirmedEvent(appointment.getId(),
+                appointment.getPatient().getId(), patientUser.getEmail(), patientUser.getFullName(),
+                slot.getStartTime(), slot.getEndTime(), doctor.getId(), doctorUser.getFullName());
+        eventPublisher.publishEvent(event);
+
+        log.info("Published appointment confirmed event for appointment: {}", appointment.getId());
+    }
+
+    private void publishAppointmentRejectedEvent(Appointment appointment, AppointmentSlot slot,
+            String reason) {
+        User patientUser = appointment.getPatient().getUser();
+        Doctor doctor = slot.getDoctor();
+        User doctorUser = doctor.getUser();
+
+        AppointmentRejectedEvent event = new AppointmentRejectedEvent(appointment.getId(),
+                appointment.getPatient().getId(), patientUser.getEmail(), patientUser.getFullName(),
+                slot.getStartTime(), slot.getEndTime(), doctor.getId(), doctorUser.getFullName(),
+                reason);
+        eventPublisher.publishEvent(event);
+
+        log.info("Published appointment rejected event for appointment: {}", appointment.getId());
     }
 }
