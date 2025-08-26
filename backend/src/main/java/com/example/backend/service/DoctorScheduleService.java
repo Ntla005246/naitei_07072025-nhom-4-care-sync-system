@@ -8,4 +8,6 @@ public interface DoctorScheduleService {
     ScheduleTemplateDto createTemplate(ScheduleTemplateUpsertRequest req);
 
     ScheduleTemplateDto updateTemplate(Long templateId, ScheduleTemplateUpsertRequest req);
+
+    void deleteSchedule(Long scheduleId);
 }

@@ -45,4 +45,14 @@ public interface AppointmentSlotRepository extends JpaRepository<AppointmentSlot
             """)
     boolean existsOverlap(@Param("doctorId") Long doctorId, @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end);
+
+    @Query("""
+                select (count(s) > 0) from AppointmentSlot s
+                where s.doctor.id = :doctorId
+                  and s.startTime >= :startTime
+                  and s.endTime <= :endTime
+                  and s.status = com.example.backend.constant.enums.AppointmentSlotStatus.BOOKED
+            """)
+    boolean existsBookedFuture(Long doctorId, LocalDateTime startTime, LocalDateTime endTime);
+
 }

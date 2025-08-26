@@ -7,6 +7,7 @@ import com.example.backend.dto.ScheduleTemplateUpsertRequest;
 import com.example.backend.service.DoctorScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,16 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(ApiConstants.DOCTOR_SCHEDULE_TEMPLATES_ENDPOINT)
 @PreAuthorize("hasRole('DOCTOR')")
+@RequiredArgsConstructor
 public class DoctorScheduleController {
 
     private final DoctorScheduleService scheduleService;
     private final MessageSource messageSource;
-
-    public DoctorScheduleController(DoctorScheduleService scheduleService,
-            MessageSource messageSource) {
-        this.scheduleService = scheduleService;
-        this.messageSource = messageSource;
-    }
 
     @Operation(summary = "Create a working schedule", description = "Doctor creates a new working hour schedule")
     @PostMapping
@@ -44,5 +40,15 @@ public class DoctorScheduleController {
         String msg = messageSource.getMessage("success.workinghour.upserted", null,
                 LocaleContextHolder.getLocale());
         return ApiResponse.success(data, msg);
+    }
+
+    @Operation(summary = "Delete a working schedule", description = "Doctor deletes an existing working hour schedule by ID "
+            + "if no future booked appointment exits")
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> deleteSchedule(@PathVariable("id") Long id) {
+        scheduleService.deleteSchedule(id);
+        String msg = messageSource.getMessage("success.workinghour.delete", null,
+                LocaleContextHolder.getLocale());
+        return ApiResponse.success(null, msg);
     }
 }
