@@ -1,13 +1,13 @@
 -- Update CHECK constraints for MySQL 8+
 
 -- Drop existing appointment status check and add REJECTED
-ALTER TABLE appointments DROP CHECK chk_appointment_status;
+ALTER TABLE appointments DROP CONSTRAINT IF EXISTS chk_appointment_status;
 ALTER TABLE appointments
   ADD CONSTRAINT chk_appointment_status
   CHECK (status IN ('PENDING','CONFIRMED','CANCELLED','COMPLETED','REJECTED'));
 
 -- Drop existing notification type check and extend values
-ALTER TABLE notifications DROP CHECK chk_notification_type;
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS chk_notification_type;
 ALTER TABLE notifications
   ADD CONSTRAINT chk_notification_type
   CHECK (type IN (

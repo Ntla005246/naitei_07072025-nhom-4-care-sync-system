@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Sidebar Fragment</title>
+  </head>
+  <body>
+    <!-- Sidebar Fragment -->
+    <nav class="sidebar" th:fragment="sidebar">
+      <div class="position-sticky pt-4">
+        <div class="text-center mb-5">
+          <div class="mb-3">
+            <i class="fas fa-heartbeat fa-3x text-white"></i>
+          </div>
+          <h4 class="text-white fw-bold">Care Sync</h4>
+          <p class="text-white-50 small">Admin Panel</p>
+        </div>
+
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/dashboard">
+              <i class="fas fa-tachometer-alt me-3"></i>
+              Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/users">
+              <i class="fas fa-user-shield me-3"></i>
+              Users
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/appointments">
+              <i class="fas fa-calendar-check me-3"></i>
+              Appointments
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/doctors">
+              <i class="fas fa-user-md me-3"></i>
+              Doctors
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/patients">
+              <i class="fas fa-users me-3"></i>
+              Patients
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/payments">
+              <i class="fas fa-credit-card me-3"></i>
+              Payments
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/reports">
+              <i class="fas fa-chart-bar me-3"></i>
+              Reports
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin/settings">
+              <i class="fas fa-cog me-3"></i>
+              Settings
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </body>
+</html>
