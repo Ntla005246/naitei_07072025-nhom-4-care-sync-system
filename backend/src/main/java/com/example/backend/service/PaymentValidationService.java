@@ -13,6 +13,7 @@ import com.example.backend.entity.Invoice;
 import com.example.backend.entity.Payment;
 import com.example.backend.exception.BusinessException;
 import com.example.backend.repository.PaymentRepository;
+import com.example.backend.repository.InvoiceRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +30,16 @@ public class PaymentValidationService {
         if (invoiceId == null || invoiceId <= 0) {
             throw new BusinessException("error.invoice.invalid.id");
         }
-        
-        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById, "error.invoice.not.found");
+
+        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById,
+                "error.invoice.not.found");
 
         if (invoice.getStatus() != InvoiceStatus.PENDING) {
             throw new BusinessException("error.invoice.not.pending");
         }
 
-        if (invoice.getFinalAmount() == null || invoice.getFinalAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (invoice.getFinalAmount() == null
+                || invoice.getFinalAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException("error.invoice.invalid.amount");
         }
 
@@ -47,7 +50,8 @@ public class PaymentValidationService {
     }
 
     public void validatePaymentForRefund(Long paymentId) {
-        Payment payment = validateEntityExists(paymentId, paymentRepository::findById, "error.payment.not.found");
+        Payment payment = validateEntityExists(paymentId, paymentRepository::findById,
+                "error.payment.not.found");
 
         if (payment.getStatus() != PaymentStatus.SUCCESSFUL) {
             throw new BusinessException("error.payment.cannot.refund");
@@ -60,7 +64,8 @@ public class PaymentValidationService {
     }
 
     public void validatePaymentForCancellation(Long paymentId) {
-        Payment payment = validateEntityExists(paymentId, paymentRepository::findById, "error.payment.not.found");
+        Payment payment = validateEntityExists(paymentId, paymentRepository::findById,
+                "error.payment.not.found");
 
         if (payment.getStatus() != PaymentStatus.PENDING) {
             throw new BusinessException("error.payment.cannot.cancel");
@@ -73,8 +78,9 @@ public class PaymentValidationService {
     }
 
     public void validateUserCanPayInvoice(Long invoiceId, Long userId) {
-        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById, "error.invoice.not.found");
-        
+        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById,
+                "error.invoice.not.found");
+
         // Validate that the invoice belongs to the user
         if (!invoice.getAppointment().getPatient().getId().equals(userId)) {
             throw new BusinessException("error.invoice.not.owned.by.user");
@@ -85,7 +91,7 @@ public class PaymentValidationService {
         if (paymentAmount == null || paymentAmount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessException("error.payment.amount.required");
         }
-        
+
         // Check amount range (1,000 VND to 100,000,000 VND)
         if (paymentAmount.compareTo(new BigDecimal("1000")) < 0) {
             throw new BusinessException("error.payment.amount.too.small");
@@ -93,8 +99,9 @@ public class PaymentValidationService {
         if (paymentAmount.compareTo(new BigDecimal("100000000")) > 0) {
             throw new BusinessException("error.payment.amount.too.large");
         }
-        
-        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById, "error.invoice.not.found");
+
+        Invoice invoice = validateEntityExists(invoiceId, invoiceRepository::findById,
+                "error.invoice.not.found");
 
         if (!invoice.getFinalAmount().equals(paymentAmount)) {
             throw new BusinessException("error.payment.amount.mismatch");
@@ -102,7 +109,8 @@ public class PaymentValidationService {
     }
 
     public void validatePendingPaymentsLimit(Long invoiceId) {
-        List<Payment> pendingPayments = paymentRepository.findByInvoiceIdAndStatus(invoiceId, PaymentStatus.PENDING);
+        List<Payment> pendingPayments = paymentRepository.findByInvoiceIdAndStatus(invoiceId,
+                PaymentStatus.PENDING);
 
         if (pendingPayments.size() >= 3) {
             throw new BusinessException("error.payment.too.many.pending");
@@ -113,7 +121,7 @@ public class PaymentValidationService {
         if (transactionCode == null || transactionCode.trim().isEmpty()) {
             throw new BusinessException("error.payment.transaction.code.required");
         }
-        
+
         if (paymentRepository.existsByTransactionCode(transactionCode)) {
             throw new BusinessException("error.payment.transaction.code.exists");
         }
@@ -122,36 +130,46 @@ public class PaymentValidationService {
     /**
      * Generic method to validate entity existence
      * 
-     * @param id The entity ID to validate
-     * @param findByIdFunction Function to find entity by ID
-     * @param errorMessage Error message if entity not found
+     * @param id
+     *            The entity ID to validate
+     * @param findByIdFunction
+     *            Function to find entity by ID
+     * @param errorMessage
+     *            Error message if entity not found
      * @return The found entity
-     * @throws BusinessException if entity not found
+     * @throws BusinessException
+     *             if entity not found
      */
-    private <T> T validateEntityExists(Long id, Function<Long, java.util.Optional<T>> findByIdFunction, String errorMessage) {
-        return findByIdFunction.apply(id)
-                .orElseThrow(() -> new BusinessException(errorMessage));
+    private <T> T validateEntityExists(Long id,
+            Function<Long, java.util.Optional<T>> findByIdFunction, String errorMessage) {
+        return findByIdFunction.apply(id).orElseThrow(() -> new BusinessException(errorMessage));
     }
 
     /**
      * Validate that invoice exists and return it
      * 
-     * @param invoiceId The invoice ID to validate
+     * @param invoiceId
+     *            The invoice ID to validate
      * @return The found invoice
-     * @throws BusinessException if invoice not found
+     * @throws BusinessException
+     *             if invoice not found
      */
     public Invoice validateInvoiceExists(Long invoiceId) {
-        return validateEntityExists(invoiceId, invoiceRepository::findById, "error.invoice.not.found");
+        return validateEntityExists(invoiceId, invoiceRepository::findById,
+                "error.invoice.not.found");
     }
 
     /**
      * Validate that payment exists and return it
      * 
-     * @param paymentId The payment ID to validate
+     * @param paymentId
+     *            The payment ID to validate
      * @return The found payment
-     * @throws BusinessException if payment not found
+     * @throws BusinessException
+     *             if payment not found
      */
     public Payment validatePaymentExists(Long paymentId) {
-        return validateEntityExists(paymentId, paymentRepository::findById, "error.payment.not.found");
+        return validateEntityExists(paymentId, paymentRepository::findById,
+                "error.payment.not.found");
     }
-} 
+}

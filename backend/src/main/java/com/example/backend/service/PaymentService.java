@@ -13,7 +13,8 @@ public interface PaymentService {
 
     PaymentStatus getPaymentStatusById(Long paymentId);
 
-    PaymentResponse processCallback(PaymentMethod method, String transactionCode, String signature, Object callbackData);
+    PaymentResponse processCallback(PaymentMethod method, String transactionCode, String signature,
+            Object callbackData);
 
     PaymentResponse refundPayment(String transactionCode, String reason);
 
@@ -22,4 +23,4 @@ public interface PaymentService {
     PaymentResponse cancelPayment(String transactionCode);
 
     PaymentResponse cancelPaymentById(Long paymentId);
-} 
+}

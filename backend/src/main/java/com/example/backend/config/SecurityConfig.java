@@ -40,14 +40,13 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.SPECIALTIES_ENDPOINT + "/**",
             ApiConstants.DOCTORS_ENDPOINT + "/**"};
-    
+
     private static final String[] PATIENT_ENDPOINTS = {
             ApiConstants.PATIENT_APPOINTMENTS_ENDPOINT + "/**", "/notifications/**",
             "/feedback/**"};
 
-    private static final String[] PAYMENT_ENDPOINTS = {
-            ApiConstants.PAYMENTS_ENDPOINT + "/**"};
-    
+    private static final String[] PAYMENT_ENDPOINTS = {ApiConstants.PAYMENTS_ENDPOINT + "/**"};
+
     private static final String[] DOCTOR_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/me/**",
             ApiConstants.DOCTOR_APPOINTMENTS_ENDPOINT + "/**",
             ApiConstants.DOCTOR_TIME_OFF_ENDPOINT + "/**"};
@@ -60,24 +59,24 @@ public class SecurityConfig {
         return RoleHierarchyImpl.fromHierarchy(hierarchy);
     }
 
-	@Bean
-	public static MethodSecurityExpressionHandler methodSecurityExpressionHandler(
-			RoleHierarchy roleHierarchy) {
-		DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
-		handler.setRoleHierarchy(roleHierarchy);
-		return handler;
-	}
+    @Bean
+    public static MethodSecurityExpressionHandler methodSecurityExpressionHandler(
+            RoleHierarchy roleHierarchy) {
+        DefaultMethodSecurityExpressionHandler handler = new DefaultMethodSecurityExpressionHandler();
+        handler.setRoleHierarchy(roleHierarchy);
+        return handler;
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-			throws Exception {
-		return config.getAuthenticationManager();
-	}
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -99,6 +98,6 @@ public class SecurityConfig {
                         .requestMatchers("/error", "/error/**").permitAll().anyRequest()
                         .authenticated());
 
-		return http.build();
-	}
+        return http.build();
+    }
 }

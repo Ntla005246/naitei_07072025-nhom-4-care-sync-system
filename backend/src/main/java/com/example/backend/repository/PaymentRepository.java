@@ -21,10 +21,12 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     List<Payment> findByStatus(PaymentStatus status);
 
     @Query("SELECT p FROM Payment p WHERE p.invoice.id = :invoiceId AND p.status = :status")
-    List<Payment> findByInvoiceIdAndStatus(@Param("invoiceId") Long invoiceId, @Param("status") PaymentStatus status);
+    List<Payment> findByInvoiceIdAndStatus(@Param("invoiceId") Long invoiceId,
+            @Param("status") PaymentStatus status);
 
     @Query("SELECT p FROM Payment p WHERE p.status = :status AND p.createdAt < :expiryTime")
-    List<Payment> findExpiredPayments(@Param("status") PaymentStatus status, @Param("expiryTime") java.time.LocalDateTime expiryTime);
+    List<Payment> findExpiredPayments(@Param("status") PaymentStatus status,
+            @Param("expiryTime") java.time.LocalDateTime expiryTime);
 
     boolean existsByTransactionCode(String transactionCode);
-} 
+}

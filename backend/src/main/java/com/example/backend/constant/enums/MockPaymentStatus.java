@@ -1,8 +1,7 @@
 package com.example.backend.constant.enums;
 
 public enum MockPaymentStatus {
-    SUCCESS("SUCCESS"),
-    FAILED("FAILED");
+    SUCCESS("SUCCESS"), FAILED("FAILED");
 
     private final String value;
 

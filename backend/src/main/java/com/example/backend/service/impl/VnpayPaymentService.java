@@ -16,6 +16,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.PaymentRepository;
 import com.example.backend.service.PaymentService;
 import com.example.backend.service.PaymentValidationService;
+import com.example.backend.repository.InvoiceRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,8 +71,8 @@ public class VnpayPaymentService implements PaymentService {
 
     @Override
     public PaymentStatus getPaymentStatus(String transactionCode) {
-        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
-                .orElseThrow(() -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode).orElseThrow(
+                () -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
         return payment.getStatus();
     }
 
@@ -82,15 +83,18 @@ public class VnpayPaymentService implements PaymentService {
     }
 
     @Override
-    public PaymentResponse processCallback(PaymentMethod method, String transactionCode, String signature, Object callbackData) {
+    public PaymentResponse processCallback(PaymentMethod method, String transactionCode,
+            String signature, Object callbackData) {
         log.info("Processing VNPay callback for transaction: {}", transactionCode);
 
-        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
-                .orElseThrow(() -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode).orElseThrow(
+                () -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
 
         // Check if payment is already processed to avoid overwriting status
-        if (payment.getStatus() == PaymentStatus.SUCCESSFUL || payment.getStatus() == PaymentStatus.CANCELLED) {
-            log.warn("Payment {} is already processed with status: {}", transactionCode, payment.getStatus());
+        if (payment.getStatus() == PaymentStatus.SUCCESSFUL
+                || payment.getStatus() == PaymentStatus.CANCELLED) {
+            log.warn("Payment {} is already processed with status: {}", transactionCode,
+                    payment.getStatus());
             return buildPaymentResponse(payment, null);
         }
 
@@ -104,8 +108,8 @@ public class VnpayPaymentService implements PaymentService {
     public PaymentResponse refundPayment(String transactionCode, String reason) {
         log.info("Processing VNPay refund for transaction: {}", transactionCode);
 
-        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
-                .orElseThrow(() -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode).orElseThrow(
+                () -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
 
         validationService.validatePaymentForRefund(payment.getId());
 
@@ -119,8 +123,8 @@ public class VnpayPaymentService implements PaymentService {
     public PaymentResponse cancelPayment(String transactionCode) {
         log.info("Cancelling VNPay payment for transaction: {}", transactionCode);
 
-        Payment payment = paymentRepository.findByTransactionCode(transactionCode)
-                .orElseThrow(() -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
+        Payment payment = paymentRepository.findByTransactionCode(transactionCode).orElseThrow(
+                () -> new ResourceNotFoundException("error.payment.not.found", transactionCode));
 
         validationService.validatePaymentForCancellation(payment.getId());
 
@@ -143,7 +147,8 @@ public class VnpayPaymentService implements PaymentService {
     }
 
     private String generateTransactionCode() {
-        return "VNPAY_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8);
+        return "VNPAY_" + System.currentTimeMillis() + "_"
+                + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private String createVnpayPaymentUrl(Payment payment, PaymentRequest request) {
@@ -153,20 +158,15 @@ public class VnpayPaymentService implements PaymentService {
     /**
      * Build PaymentResponse from Payment entity
      * 
-     * @param payment The payment entity
-     * @param paymentUrl The payment URL (can be null for non-create operations)
+     * @param payment
+     *            The payment entity
+     * @param paymentUrl
+     *            The payment URL (can be null for non-create operations)
      * @return PaymentResponse
      */
     private PaymentResponse buildPaymentResponse(Payment payment, String paymentUrl) {
-        return new PaymentResponse(
-                payment.getId(),
-                payment.getInvoice().getId(),
-                payment.getAmount(),
-                payment.getPaymentMethod().toString(),
-                payment.getStatus(),
-                payment.getTransactionCode(),
-                paymentUrl,
-                payment.getCreatedAt()
-        );
+        return new PaymentResponse(payment.getId(), payment.getInvoice().getId(),
+                payment.getAmount(), payment.getPaymentMethod().toString(), payment.getStatus(),
+                payment.getTransactionCode(), paymentUrl, payment.getCreatedAt());
     }
-} 
+}

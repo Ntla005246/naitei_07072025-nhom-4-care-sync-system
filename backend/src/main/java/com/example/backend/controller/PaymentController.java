@@ -38,7 +38,8 @@ public class PaymentController {
 
     private static final String MOMO_PREFIX = "MOMO_";
     private static final String VNPAY_PREFIX = "VNPAY_";
-    private static final DateTimeFormatter TRANSACTION_CODE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+    private static final DateTimeFormatter TRANSACTION_CODE_FORMATTER = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmssSSS");
 
     private final PaymentFactoryService paymentFactoryService;
     private final MessageSource messageSource;
@@ -47,11 +48,13 @@ public class PaymentController {
     @Operation(summary = "Create payment", description = "Create a new payment request for an invoice")
     @PreAuthorize("hasRole('PATIENT')")
     public ApiResponse<PaymentResponse> createPayment(@Valid @RequestBody PaymentRequest request) {
-        log.info("Creating payment request: invoiceId={}, method={}", request.invoiceId(), request.paymentMethod());
-        
+        log.info("Creating payment request: invoiceId={}, method={}", request.invoiceId(),
+                request.paymentMethod());
+
         PaymentResponse response = paymentFactoryService.createPayment(request);
-        String message = messageSource.getMessage("success.payment.created", null, LocaleContextHolder.getLocale());
-        
+        String message = messageSource.getMessage("success.payment.created", null,
+                LocaleContextHolder.getLocale());
+
         return ApiResponse.success(response, message);
     }
 
@@ -60,10 +63,11 @@ public class PaymentController {
     @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
     public ApiResponse<PaymentStatus> getPaymentStatus(@PathVariable Long paymentId) {
         log.info("Getting payment status for payment ID: {}", paymentId);
-        
+
         PaymentStatus status = paymentFactoryService.getPaymentStatusById(paymentId);
-        String message = messageSource.getMessage("success.payment.status.retrieved", null, LocaleContextHolder.getLocale());
-        
+        String message = messageSource.getMessage("success.payment.status.retrieved", null,
+                LocaleContextHolder.getLocale());
+
         return ApiResponse.success(status, message);
     }
 
@@ -71,12 +75,14 @@ public class PaymentController {
     @Operation(summary = "MoMo payment callback", description = "Handle MoMo payment callback")
     public ApiResponse<String> momoCallback(@RequestBody String callbackData) {
         log.info("Received MoMo callback: {}", callbackData);
-        
+
         String transactionCode = generateTransactionCode(MOMO_PREFIX);
-        
-        PaymentResponse response = paymentFactoryService.processCallback(PaymentMethod.MOMO, transactionCode, MockConstants.DEFAULT_SIGNATURE, callbackData);
-        
-        String message = messageSource.getMessage("success.payment.callback.processed", null, LocaleContextHolder.getLocale());
+
+        PaymentResponse response = paymentFactoryService.processCallback(PaymentMethod.MOMO,
+                transactionCode, MockConstants.DEFAULT_SIGNATURE, callbackData);
+
+        String message = messageSource.getMessage("success.payment.callback.processed", null,
+                LocaleContextHolder.getLocale());
         return ApiResponse.success("OK", message);
     }
 
@@ -86,50 +92,54 @@ public class PaymentController {
         log.info("Received VNPay callback: {}", callbackData);
 
         String transactionCode = generateTransactionCode(VNPAY_PREFIX);
-        
-        PaymentResponse response = paymentFactoryService.processCallback(PaymentMethod.VNPAY, transactionCode, MockConstants.DEFAULT_SIGNATURE, callbackData);
-        
-        String message = messageSource.getMessage("success.payment.callback.processed", null, LocaleContextHolder.getLocale());
+
+        PaymentResponse response = paymentFactoryService.processCallback(PaymentMethod.VNPAY,
+                transactionCode, MockConstants.DEFAULT_SIGNATURE, callbackData);
+
+        String message = messageSource.getMessage("success.payment.callback.processed", null,
+                LocaleContextHolder.getLocale());
         return ApiResponse.success("OK", message);
     }
 
     @PostMapping("/{paymentId}/refund")
     @Operation(summary = "Refund payment", description = "Refund a successful payment")
     @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<PaymentResponse> refundPayment(
-            @PathVariable Long paymentId,
-            @RequestParam PaymentMethod method,
-            @RequestParam String reason) {
-        log.info("Processing refund for payment ID: {}, method: {}, reason: {}", paymentId, method, reason);
-        
-        PaymentResponse response = paymentFactoryService.refundPaymentById(method, paymentId, reason);
-        String message = messageSource.getMessage("success.payment.refunded", null, LocaleContextHolder.getLocale());
-        
+    public ApiResponse<PaymentResponse> refundPayment(@PathVariable Long paymentId,
+            @RequestParam PaymentMethod method, @RequestParam String reason) {
+        log.info("Processing refund for payment ID: {}, method: {}, reason: {}", paymentId, method,
+                reason);
+
+        PaymentResponse response = paymentFactoryService.refundPaymentById(method, paymentId,
+                reason);
+        String message = messageSource.getMessage("success.payment.refunded", null,
+                LocaleContextHolder.getLocale());
+
         return ApiResponse.success(response, message);
     }
 
     @PostMapping("/{paymentId}/cancel")
     @Operation(summary = "Cancel payment", description = "Cancel a pending payment")
     @PreAuthorize("hasRole('PATIENT') or hasRole('ADMIN')")
-    public ApiResponse<PaymentResponse> cancelPayment(
-            @PathVariable Long paymentId,
+    public ApiResponse<PaymentResponse> cancelPayment(@PathVariable Long paymentId,
             @RequestParam PaymentMethod method) {
         log.info("Cancelling payment for payment ID: {}", paymentId);
-        
+
         PaymentResponse response = paymentFactoryService.cancelPaymentById(method, paymentId);
-        String message = messageSource.getMessage("success.payment.cancelled", null, LocaleContextHolder.getLocale());
-        
+        String message = messageSource.getMessage("success.payment.cancelled", null,
+                LocaleContextHolder.getLocale());
+
         return ApiResponse.success(response, message);
     }
 
     /**
      * Generate a unique transaction code with prefix and timestamp
      * 
-     * @param prefix The prefix for the transaction code (e.g., "MOMO_", "VNPAY_")
+     * @param prefix
+     *            The prefix for the transaction code (e.g., "MOMO_", "VNPAY_")
      * @return A unique transaction code
      */
     private String generateTransactionCode(String prefix) {
         String timestamp = LocalDateTime.now().format(TRANSACTION_CODE_FORMATTER);
         return prefix + timestamp;
     }
-} 
+}

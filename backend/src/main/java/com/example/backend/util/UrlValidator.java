@@ -20,26 +20,26 @@ public class UrlValidator implements ConstraintValidator<ValidUrl, String> {
 
         try {
             URL parsedUrl = new URL(url);
-            
+
             String protocol = parsedUrl.getProtocol();
             if (!"http".equals(protocol) && !"https".equals(protocol)) {
                 return false;
             }
-            
+
             String host = parsedUrl.getHost();
             if (host == null || host.trim().isEmpty()) {
                 return false;
             }
-            
+
             if (!host.contains(".")) {
                 return false;
             }
-            
+
             int port = parsedUrl.getPort();
             if (port != -1 && (port < 1 || port > 65535)) {
                 return false;
             }
-            
+
             return true;
         } catch (MalformedURLException e) {
             return false;
