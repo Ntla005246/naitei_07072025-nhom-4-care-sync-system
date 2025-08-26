@@ -31,6 +31,7 @@ import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.AppointmentMapper;
 import com.example.backend.repository.*;
 import com.example.backend.service.AppointmentService;
+import com.example.backend.service.CalendarSyncService;
 import com.example.backend.util.SecurityUtils;
 
 import java.time.LocalDate;
@@ -76,6 +77,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final MessageSource messageSource;
     private final ApplicationEventPublisher eventPublisher;
     private final InvoiceService invoiceService;
+    private final CalendarSyncService calendarSyncService;
 
     @Override
     @Transactional
@@ -181,6 +183,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             // Không throw exception để không ảnh hưởng đến việc confirm appointment
         }
 
+        // Sync to calendar when appointment is confirmed
+        calendarSyncService.syncAppointmentToCalendar(saved);
+
+        // TODO: publish AppointmentConfirmedEvent here (Patient Notifications task)
+        
+        // Notification out of current scope: do not publish confirmed event
+
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);
     }
@@ -213,6 +222,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // TODO: Implement invoice cancellation logic if needed
         log.info("Appointment rejected: {}", saved.getId());
+
+        // Sync to calendar when appointment is rejected
+        calendarSyncService.syncAppointmentToCalendar(saved);
+
+        // TODO: publish AppointmentRejectedEvent here (Patient Notifications task)
+
+        // Notification out of current scope: do not publish rejected event
 
         var apptServices = appointmentServiceRepository.findByAppointmentId(saved.getId());
         return AppointmentMapper.buildFromAppointmentServices(saved, slot, apptServices);

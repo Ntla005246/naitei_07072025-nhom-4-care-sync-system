@@ -37,7 +37,8 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {ApiConstants.AUTH_ENDPOINT + "/**",
             "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html", "/actuator/**",
             "/api/v1/auth/verify-email", ApiConstants.USERS_ENDPOINT + "/profile",
-            "/admin/**", "/css/**", "/js/**", "/fonts/**", "/webfonts/**", "/images/**"};
+            "/admin/**", "/css/**", "/js/**", "/fonts/**", "/webfonts/**", "/images/**",
+            "/api/v1/calendar/oauth/**"};
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {ApiConstants.SPECIALTIES_ENDPOINT + "/**",
             ApiConstants.DOCTORS_ENDPOINT + "/**"};
@@ -50,7 +51,7 @@ public class SecurityConfig {
 
     private static final String[] DOCTOR_ENDPOINTS = {ApiConstants.DOCTORS_ENDPOINT + "/me/**",
             ApiConstants.DOCTOR_APPOINTMENTS_ENDPOINT + "/**",
-            ApiConstants.DOCTOR_TIME_OFF_ENDPOINT + "/**"};
+            ApiConstants.DOCTOR_TIME_OFF_ENDPOINT + "/**", ApiConstants.CALENDAR_ENDPOINT + "/**"};
 
     private static final String[] ADMIN_ENDPOINTS = {ApiConstants.ADMIN_ENDPOINT + "/**"};
 

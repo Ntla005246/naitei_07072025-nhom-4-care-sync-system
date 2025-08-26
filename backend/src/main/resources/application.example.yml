@@ -83,6 +83,7 @@ app:
   mail:
     fromEmail: ${MAIL_FROM:no-reply@example.com}
     fromName: ${MAIL_FROM_NAME:CareSync}
+  base-url: ${APP_BASE_URL:http://localhost:8080}
 
 # Payment providers configuration (examples)
 payment:
@@ -98,3 +99,9 @@ payment:
     hash-secret: ${PAYMENT_VNPAY_HASH_SECRET:test-hash}
     url: ${PAYMENT_VNPAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
     return-url: ${PAYMENT_VNPAY_RETURN_URL:http://localhost:8080/payment/vnpay/return}
+
+# Google Calendar Configuration
+google:
+  calendar:
+    client-id: ${GOOGLE_CALENDAR_CLIENT_ID:your-google-client-id}
+    client-secret: ${GOOGLE_CALENDAR_CLIENT_SECRET:your-google-client-secret}

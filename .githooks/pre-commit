@@ -14,11 +14,11 @@ if [ -z "$BACKEND_CHANGED" ]; then
     exit 0
 fi
 
-# Chạy Spotless trong thư mục backend
+# Chạy Spotless cho các file staged
 if [ -f "./backend/mvnw" ]; then
-    (cd backend && ./mvnw spotless:apply)
+    (cd backend && ./mvnw spotless:apply -DspotlessFiles="$BACKEND_CHANGED")
 else
-    (cd backend && mvn spotless:apply)
+    (cd backend && mvn spotless:apply -DspotlessFiles="$BACKEND_CHANGED") 
 fi
 
 # Nếu Spotless fail thì chặn commit
@@ -27,12 +27,11 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Lấy danh sách file bị Spotless thay đổi
-CHANGED_FILES=$(git diff --name-only)
-
 # Git add lại các file đã format
-echo "📄 Adding formatted changed files..."
-echo "$CHANGED_FILES" | xargs git add
+echo "📄 Adding formatted staged files..."
+for file in $BACKEND_CHANGED; do
+    git add "$file"
+done
 
 echo "✅ Spotless formatting complete. Proceeding with commit..."
 
