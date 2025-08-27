@@ -35,9 +35,9 @@ public class SpecialtyController {
     private final DoctorService doctorService;
     private final MessageSource messageSource;
 
-    @GetMapping("/search")
-    @Operation(summary = "Search specialties with filtering and pagination", description = "Search specialties by name, filter by location and status, with pagination support")
-    public ApiResponse<PageResponse<SpecialtyDto>> searchSpecialties(
+    @GetMapping
+    @Operation(summary = "Get specialties with filtering and pagination", description = "Get specialties by name, filter by location and status, with pagination support")
+    public ApiResponse<PageResponse<SpecialtyDto>> getSpecialties(
             @Valid @ModelAttribute SpecialtySearchRequest request) {
 
         log.info("Received specialty search request: q={}, location={}, page={}, size={}",
