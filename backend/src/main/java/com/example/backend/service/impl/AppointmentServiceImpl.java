@@ -29,7 +29,11 @@ import com.example.backend.exception.BusinessException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.AppointmentMapper;
-import com.example.backend.repository.*;
+import com.example.backend.repository.AppointmentRepository;
+import com.example.backend.repository.AppointmentSlotRepository;
+import com.example.backend.repository.AppointmentServiceRepository;
+import com.example.backend.repository.ServiceRepository;
+import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AppointmentService;
 import com.example.backend.service.CalendarSyncService;
 import com.example.backend.util.SecurityUtils;
@@ -71,7 +75,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentSlotRepository appointmentSlotRepository;
     private final AppointmentServiceRepository appointmentServiceRepository;
     private final ServiceRepository serviceRepository;
-    private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final AppointmentMapper appointmentMapper;
     private final MessageSource messageSource;
@@ -82,8 +85,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentCreateResponse create(AppointmentCreateRequest request) {
-        log.info("Creating appointment for patient {} with slot {}", request.patientId(),
-                request.slotId());
+        log.info("Creating appointment with slot {}", request.slotId());
+
+        // Lấy thông tin patient từ current user
+        String email = SecurityUtils.getCurrentUserEmailOrThrow();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("error.user.not.found"));
+
+        Patient patient = currentUser.getPatient();
+        if (patient == null) {
+            throw new AccessDeniedException("error.access.denied");
+        }
 
         AppointmentSlot slot = appointmentSlotRepository.findById(request.slotId()).orElseThrow(
                 () -> new ResourceNotFoundException("error.slot.not.found", request.slotId()));
@@ -94,10 +106,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException("error.appointment.slot.unavailable");
         }
-
-        Patient patient = patientRepository.findById(request.patientId())
-                .orElseThrow(() -> new ResourceNotFoundException("error.patient.not.found",
-                        request.patientId()));
 
         List<com.example.backend.entity.Service> services = serviceRepository
                 .findAllById(request.serviceIds());

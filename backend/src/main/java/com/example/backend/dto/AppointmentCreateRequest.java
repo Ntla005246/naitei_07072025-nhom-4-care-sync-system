@@ -8,7 +8,6 @@ import java.util.List;
 @Schema(description = "Yêu cầu tạo lịch hẹn từ một slot đang AVAILABLE")
 public record AppointmentCreateRequest(
         @Schema(description = "ID slot đã chọn", example = "1001") @NotNull Long slotId,
-        @Schema(description = "ID bệnh nhân", example = "2001") @NotNull Long patientId,
         @Schema(description = "Danh sách ID dịch vụ cần khám", example = "[3001, 3002]") @NotEmpty List<Long> serviceIds,
         @Schema(description = "Ghi chú", example = "Đau ngực vài ngày gần đây") String notes) {
 }
