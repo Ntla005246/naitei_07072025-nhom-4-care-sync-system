@@ -159,6 +159,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public AppointmentCreateResponse confirm(Long appointmentId) {
         log.info("Confirm appointment: {}", appointmentId);
+
+        // Lấy thông tin doctor từ current user
+        String email = SecurityUtils.getCurrentUserEmailOrThrow();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("error.user.not.found"));
+
+        Doctor currentDoctor = currentUser.getDoctor();
+        if (currentDoctor == null) {
+            throw new AccessDeniedException("error.access.denied");
+        }
+
         var appt = appointmentRepository.findById(appointmentId).orElseThrow(
                 () -> new ResourceNotFoundException("error.appointment.not.found", appointmentId));
 
@@ -170,6 +181,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (slot == null) {
             throw new BusinessException("error.appointment.slot.missing");
         }
+
+        // Kiểm tra appointment có thuộc về current doctor không
+        if (!Objects.equals(slot.getDoctor().getId(), currentDoctor.getId())) {
+            throw new AccessDeniedException("error.access.denied");
+        }
+
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
             throw new BusinessException("error.appointment.cannot.confirm.after.start");
         }
@@ -206,6 +223,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public AppointmentCreateResponse reject(Long appointmentId, AppointmentRejectRequest request) {
         log.info("Reject appointment: {}, reason: {}", appointmentId, request.reason());
+
+        // Lấy thông tin doctor từ current user
+        String email = SecurityUtils.getCurrentUserEmailOrThrow();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("error.user.not.found"));
+
+        Doctor currentDoctor = currentUser.getDoctor();
+        if (currentDoctor == null) {
+            throw new AccessDeniedException("error.access.denied");
+        }
+
         var appt = appointmentRepository.findById(appointmentId).orElseThrow(
                 () -> new ResourceNotFoundException("error.appointment.not.found", appointmentId));
 
@@ -217,6 +245,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         var slot = appointmentSlotRepository.findByAppointmentId(appointmentId);
         if (slot == null) {
             throw new BusinessException("error.appointment.slot.missing");
+        }
+
+        // Kiểm tra appointment có thuộc về current doctor không
+        if (!Objects.equals(slot.getDoctor().getId(), currentDoctor.getId())) {
+            throw new AccessDeniedException("error.access.denied");
         }
 
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
