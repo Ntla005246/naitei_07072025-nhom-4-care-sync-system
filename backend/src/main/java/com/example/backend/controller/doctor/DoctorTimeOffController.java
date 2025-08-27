@@ -21,9 +21,9 @@ public class DoctorTimeOffController {
     private final DoctorTimeOffService doctorTimeOffService;
 
     @PostMapping
-    @Operation(summary = "Create doctor time off", description = "Create a new time off request for a doctor")
+    @Operation(summary = "Create doctor time off", description = "Create a new time off request for the current doctor")
     public ApiResponse<String> createTimeOff(@Valid @RequestBody DoctorTimeOffRequestDto request) {
-        log.info("Received time off creation request for doctor: {}", request.doctorId());
+        log.info("Received time off creation request");
         return doctorTimeOffService.createTimeOff(request);
     }
 }
