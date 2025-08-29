@@ -25,6 +25,8 @@ public class ServiceAdminServiceImpl implements ServiceAdminService {
     @Override
     @Transactional
     public ServiceResponse create(ServiceCreateRequest req) {
+        org.slf4j.LoggerFactory.getLogger(ServiceAdminServiceImpl.class).info(
+                "Admin create service: specialtyId={}, name={}", req.specialtyId(), req.name());
         var sp = specialtyRepository.findById(req.specialtyId())
                 .orElseThrow(() -> new ResourceNotFoundException("error.specialty.not.found"));
 
@@ -46,6 +48,9 @@ public class ServiceAdminServiceImpl implements ServiceAdminService {
     @Override
     @Transactional
     public ServiceResponse update(Long id, ServiceUpdateRequest req) {
+        org.slf4j.LoggerFactory.getLogger(ServiceAdminServiceImpl.class).info(
+                "Admin update service: id={}, newName={} newSpecialtyId={}", id, req.name(),
+                req.specialtyId());
         var e = serviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("error.service.not.found"));
 

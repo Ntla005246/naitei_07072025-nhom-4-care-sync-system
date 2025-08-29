@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record ServiceCreateRequest(
         @Schema(description = "ID của chuyên khoa", example = "1") @NotNull Integer specialtyId,
 
-        @Schema(description = "Tên dịch vụ", example = "Khám tổng quát") @NotBlank String name,
+        @Schema(description = "Tên dịch vụ", example = "Khám tổng quát") @NotBlank @Size(min = 1, max = 255) String name,
 
         @Schema(description = "Mô tả dịch vụ", example = "Khám lâm sàng cơ bản") String description,
 

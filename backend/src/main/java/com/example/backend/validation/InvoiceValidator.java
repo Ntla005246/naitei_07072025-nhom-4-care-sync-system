@@ -19,7 +19,6 @@ public class InvoiceValidator {
 
     private final InvoiceRepository invoiceRepository;
 
-
     public void validateInvoiceAmount(BigDecimal amount) {
         if (amount == null) {
             throw new BusinessException("error.invoice.amount.required");
@@ -42,8 +41,6 @@ public class InvoiceValidator {
         }
     }
 
-
-
     public void validateInvoiceCreation(Long appointmentId) {
         if (appointmentId == null || appointmentId <= 0) {
             throw new BusinessException("error.invoice.appointment.id.invalid");
@@ -53,8 +50,6 @@ public class InvoiceValidator {
             throw new BusinessException("error.invoice.already.exists", appointmentId);
         }
     }
-
-
 
     public void validateInvoiceCode(String invoiceCode) {
         if (invoiceCode == null || invoiceCode.trim().isEmpty()) {
@@ -68,20 +63,19 @@ public class InvoiceValidator {
         if (invoiceCode.length() > 100) {
             throw new BusinessException("error.invoice.code.too.long");
         }
-        
+
         if (invoiceRepository.existsByInvoiceCode(invoiceCode)) {
             throw new BusinessException("error.invoice.code.already.exists");
         }
     }
 
-
-
-    private <T> T validateEntityExists(Long id, Function<Long, java.util.Optional<T>> findByIdFunction, String errorMessage) {
-        return findByIdFunction.apply(id)
-                .orElseThrow(() -> new BusinessException(errorMessage));
+    private <T> T validateEntityExists(Long id,
+            Function<Long, java.util.Optional<T>> findByIdFunction, String errorMessage) {
+        return findByIdFunction.apply(id).orElseThrow(() -> new BusinessException(errorMessage));
     }
 
     public Invoice validateInvoiceExists(Long invoiceId) {
-        return validateEntityExists(invoiceId, invoiceRepository::findById, "error.invoice.not.found");
+        return validateEntityExists(invoiceId, invoiceRepository::findById,
+                "error.invoice.not.found");
     }
-} 
+}

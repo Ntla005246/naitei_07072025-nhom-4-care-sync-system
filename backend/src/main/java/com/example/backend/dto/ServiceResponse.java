@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 
 @Schema(description = "Thông tin dịch vụ trả về cho client")
-public record ServiceResponse(@Schema(description = "ID dịch vụ", example = "10") Integer id,
+public record ServiceResponse(@Schema(description = "ID dịch vụ", example = "10") Long id,
 
         @Schema(description = "ID chuyên khoa", example = "1") Long specialtyId,
 

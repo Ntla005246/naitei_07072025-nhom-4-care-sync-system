@@ -11,4 +11,4 @@ public interface InvoiceService {
     InvoiceResponse getInvoiceByAppointmentId(Long appointmentId);
 
     String generateInvoiceCode();
-} 
+}

@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public record ServiceUpdateRequest(
         @Schema(description = "ID chuyên khoa mới", example = "2") Integer specialtyId,
 
-        @Schema(description = "Tên dịch vụ mới", example = "Khám tổng quát nâng cao") String name,
+        @Schema(description = "Tên dịch vụ mới", example = "Khám tổng quát nâng cao") @Size(min = 1, max = 255) String name,
 
         @Schema(description = "Mô tả dịch vụ mới", example = "Có xét nghiệm cơ bản") String description,
 

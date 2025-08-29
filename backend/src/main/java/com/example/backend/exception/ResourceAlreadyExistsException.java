@@ -8,4 +8,4 @@ public class ResourceAlreadyExistsException extends BusinessException {
     public ResourceAlreadyExistsException(String errorCode, Object... args) {
         super(errorCode, args);
     }
-} 
+}

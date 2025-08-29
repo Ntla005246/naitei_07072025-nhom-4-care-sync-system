@@ -214,7 +214,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             BigDecimal totalAmount = apptServices.stream()
                     .map(com.example.backend.entity.AppointmentService::getPriceAtBooking)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            
+
             invoiceService.createInvoiceForAppointment(saved.getId(), totalAmount);
             log.info("Auto-created invoice for confirmed appointment: {}", saved.getId());
         } catch (Exception e) {

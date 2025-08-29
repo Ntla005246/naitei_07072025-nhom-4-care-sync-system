@@ -11,6 +11,6 @@ import com.example.backend.entity.Invoice;
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     Optional<Invoice> findByAppointmentId(Long appointmentId);
-    
+
     boolean existsByInvoiceCode(String invoiceCode);
-} 
+}
